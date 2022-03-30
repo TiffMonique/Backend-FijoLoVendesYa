@@ -29,7 +29,7 @@ const login= async (req, res)=>{
                     req.session.admin = result[0].idRol == 2;// provisional, solo funciona si el rol admin es 2
                     console.log(req.session.cookie);
                     res.status(200).json({
-                        admin: true,
+                        admin: req.session.admin,
                         message: "Autenticado"
                     });
                 } else {
