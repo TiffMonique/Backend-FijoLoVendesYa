@@ -6,49 +6,59 @@ const modeloUsuarios = require("../models/UsuariosMD.js");
 
 // Inserta una venta con todo y su detalle
 // estado es bool, categoría es int, debe existir la categoría
-const crearVenta= async (req, res)=>{
-    const {estado, categoria, producto, cantidad, descripcion, precio} = req.body;
-    const idUsuario = req.session.user;
-    let now = new Date();
-    const fechaPublicacion = now.getTime();
-    const venta = {estado, categoria, producto, cantidad, descripcion, precio, idUsuario, fechaPublicacion};
-    try {
-        const respuesta = await ventasMD.create(venta);
-        res.json({
-            message: "Venta Registrada exitosamente",
-            venta: respuesta
-        })
-    }catch (error) {
-        res.json({message: error.message})
-    }
-}
+const crearVenta = async (req, res) => {
+  const { estado, categoria, producto, cantidad, descripcion, precio } =
+    req.body;
+  const idUsuario = req.session.user;
+  let now = new Date();
+  const fechaPublicacion = now.getTime();
+  const venta = {
+    estado,
+    categoria,
+    producto,
+    cantidad,
+    descripcion,
+    precio,
+    idUsuario,
+    fechaPublicacion,
+  };
+  try {
+    const respuesta = await ventasMD.create(venta);
+    res.json({
+      message: "Venta Registrada exitosamente",
+      venta: respuesta,
+    });
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+};
 
 //Elimina una venta solo si lo solicita el usuario que la creó
-const eliminarVenta = async(req, res) => {
-    const idVenta = req.params.idVenta;
-    const idUsuario = req.session.user;
-    try {
-        const venta = await ventasMD.findAll({
-            attributes: [[Sequelize.fn('COUNT', Sequelize.col('idVenta')), 'cuenta']],
-            where:{
-                idVenta:idVenta,
-                idUsuario: idUsuario
-            }
-        })
-        console.log(venta);
-        if(venta[0].dataValues.cuenta > 0) {
-            ventasMD.destroy({
-                where: {idVenta:idVenta}
-            });
-            res.status(200).json({message: "Vena eliminada exitosamente"});
-        } else {
-            res.status(401).json({message: "No se pudo eliminar la venta"});
-        }
-    } catch (error) {
-        res.json({message: error.message});
+const eliminarVenta = async (req, res) => {
+  const idVenta = req.params.idVenta;
+  const idUsuario = req.session.user;
+  try {
+    const venta = await ventasMD.findAll({
+      attributes: [[Sequelize.fn("COUNT", Sequelize.col("idVenta")), "cuenta"]],
+      where: {
+        idVenta: idVenta,
+        idUsuario: idUsuario,
+      },
+    });
+    console.log(venta);
+    if (venta[0].dataValues.cuenta > 0) {
+      ventasMD.destroy({
+        where: { idVenta: idVenta },
+      });
+      res.status(200).json({ message: "Vena eliminada exitosamente" });
+    } else {
+      res.status(401).json({ message: "No se pudo eliminar la venta" });
     }
-    //valida si el usuario creó la venta
-    /*var consulta = 'Select count(*) as cuenta from Venta where idUsuario = ? and idVenta = ?';
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+  //valida si el usuario creó la venta
+  /*var consulta = 'Select count(*) as cuenta from Venta where idUsuario = ? and idVenta = ?';
     await pool.query(consulta, [idUsuario, idVenta], (err, result) =>{
         if(err){
             res.status(500).send(err);
@@ -76,33 +86,34 @@ const eliminarVenta = async(req, res) => {
 
 //actualizar una venta
 //no puede cambiar el idUsuario, idVena ni idDetalle, ni calificacion
-const actualizarVenta = async(req, res) => {
-    const {estado, categoria, producto, cantidad, descripcion, precio} = req.body;
-    const Venta = {estado, categoria, producto, cantidad, descripcion, precio};
-    const idVenta = req.params.idVenta;
-    const idUsuario = req.session.user;
-    console.log("idusuario: ", req.session);
-    try {
-        const ventaValidacion = await ventasMD.findAll({
-            attributes: [[Sequelize.fn('COUNT', Sequelize.col('idVenta')), 'cuenta']],
-            where:{
-                idVenta:idVenta,
-                idUsuario: idUsuario
-            }
-        })
-        if(ventaValidacion[0].dataValues.cuenta>0) {
-            await ventasMD.update(Venta, {
-                where:{idVenta:idVenta}
-            });
-            res.status(200).json({message:"Venta actualizada correctamente"});
-        }else {
-            res.status(401).json({message: "No puede actualizar esta venta"})
-        }
-    } catch (error) {
-        res.json({message: error.message});
+const actualizarVenta = async (req, res) => {
+  const { estado, categoria, producto, cantidad, descripcion, precio } =
+    req.body;
+  const Venta = { estado, categoria, producto, cantidad, descripcion, precio };
+  const idVenta = req.params.idVenta;
+  const idUsuario = req.session.user;
+  console.log("idusuario: ", req.session);
+  try {
+    const ventaValidacion = await ventasMD.findAll({
+      attributes: [[Sequelize.fn("COUNT", Sequelize.col("idVenta")), "cuenta"]],
+      where: {
+        idVenta: idVenta,
+        idUsuario: idUsuario,
+      },
+    });
+    if (ventaValidacion[0].dataValues.cuenta > 0) {
+      await ventasMD.update(Venta, {
+        where: { idVenta: idVenta },
+      });
+      res.status(200).json({ message: "Venta actualizada correctamente" });
+    } else {
+      res.status(401).json({ message: "No puede actualizar esta venta" });
     }
-    
-    /*
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+
+  /*
     var consulta = 'Update Venta set estado = ? where idVenta = ?';
     await pool.query(consulta, [estado, idVenta], (err, result) =>{
         if(err){
@@ -123,24 +134,25 @@ const actualizarVenta = async(req, res) => {
     });*/
 };
 
-const listarVentas= async (req, res)=>{
-    var idUsuario;
-    if(req.params.idUsuario){
-        idUsuario = req.params.idUsuario;
-    }else {
-        idUsuario = req.session.user;
-    }
-    try {
-        const ventas = await ventasMD.findAll({
-            where: {
-                idUsuario: idUsuario
-            }
-        })
-        res.json(ventas)
-    } catch (error) {
-        res.json({message: error.message});
-    }
-    /*const consulta = 'Select * from Venta inner join DetalleVenta on Venta.idVenta = DetalleVenta.idVenta where Venta.idUsuario = ?';
+const listarVentas = async (req, res) => {
+  var idUsuario;
+  if (req.params.idUsuario) {
+    idUsuario = req.params.idUsuario;
+  } else {
+    idUsuario = req.session.user;
+  }
+  try {
+    const ventas = await ventasMD.findAll({
+      include: [modeloUsuarios, modeloCategorias],
+      where: {
+        idUsuario: idUsuario,
+      },
+    });
+    res.json(ventas);
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+  /*const consulta = 'Select * from Venta inner join DetalleVenta on Venta.idVenta = DetalleVenta.idVenta where Venta.idUsuario = ?';
     console.log(req.body);
     await pool.query(consulta, [idUsuario], (err, result) =>{
         if(err){
@@ -152,42 +164,36 @@ const listarVentas= async (req, res)=>{
             })
         }
     })*/
-}
+};
 
 const todasVentas = async (req, res) => {
-    try {
-        const sales = await ventasMD.findAll({
-            include: [modeloUsuarios, modeloCategorias],
-        })
-        res.json(sales)
-    } catch (error) {
-        res.json({message: error.message});
-    }
-}
+  try {
+    const sales = await ventasMD.findAll({
+      include: [modeloUsuarios, modeloCategorias],
+    });
+    res.json(sales);
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+};
 
-const buscarVenta= async (req, res)=>{
-    const idVenta = req.params.idVenta;
-    try {
-        const venta = await ventasMD.findAll({
-            where:{idVenta: idVenta}
-        })
-        res.json(venta[0])
-    } catch (error) {
-        res.json({message: error.message});
-    }
-    /*
-    const consulta = 'Select * from Venta inner join DetalleVenta on Venta.idVenta = DetalleVenta.idVenta where venta.idVenta = ?';
-    console.log(req.body);
-    await pool.query(consulta, [idVenta], (err, result) =>{
-        if(err){
-            res.status(500).send(err);
-        }else{
-            res.status(200).json({
-                message: `Resultado de busqueda Venta ${idVenta}`,
-                Venta: result
-            })
-        }
-    })*/
-}
+const buscarVenta = async (req, res) => {
+  const idVenta = req.params.idVenta;
+  try {
+    const venta = await ventasMD.findAll({
+      where: { idVenta: idVenta },
+    });
+    res.json(venta[0]);
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+};
 
-module.exports = {crearVenta, eliminarVenta, actualizarVenta, listarVentas, buscarVenta, todasVentas};
+module.exports = {
+  crearVenta,
+  eliminarVenta,
+  actualizarVenta,
+  listarVentas,
+  buscarVenta,
+  todasVentas,
+};
