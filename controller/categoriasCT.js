@@ -39,7 +39,7 @@ const insertarCategoria = async (req, res) => {
 const modificarCategoria = async (req, res) => {
   console.log("MENSAJE" + req.body);
   try {
-    modeloCategorias.update(req.body, {
+    await modeloCategorias.update(req.body, {
       where: { nombre: req.params.nombre },
     });
     res.json({ message: "Categoría actualizada correctamente" });

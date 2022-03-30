@@ -36,7 +36,7 @@ const crear = async (req, res) => {
                     telefono: telefono,
                     pass: pass,
                     direccion: direccion,
-                    idrol: 1
+                    idrol: 2
                 };
 
                 // Encriptando contrasenia

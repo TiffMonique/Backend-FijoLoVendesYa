@@ -13,7 +13,7 @@ const cookieParser = require('cookie-parser');
 // configurando el puerto
 app.set('port', process.env.PORT || 4000);
 var corsOptions = {
-    //origin: 'http://localhost:3000',
+    origin: 'http://localhost:3000',
     credentials: true };
 
 

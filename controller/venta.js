@@ -24,12 +24,12 @@ const crearVenta = async (req, res) => {
   };
   try {
     const respuesta = await ventasMD.create(venta);
-    res.json({
+    res.status(200).json({
       message: "Venta Registrada exitosamente",
       venta: respuesta,
     });
   } catch (error) {
-    res.json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -47,7 +47,7 @@ const eliminarVenta = async (req, res) => {
     });
     console.log(venta);
     if (venta[0].dataValues.cuenta > 0) {
-      ventasMD.destroy({
+      await ventasMD.destroy({
         where: { idVenta: idVenta },
       });
       res.status(200).json({ message: "Vena eliminada exitosamente" });
