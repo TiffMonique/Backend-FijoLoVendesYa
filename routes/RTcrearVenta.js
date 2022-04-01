@@ -1,5 +1,5 @@
 const {Router} = require("express");
-const {crearVenta, eliminarVenta, actualizarVenta, listarVentas, buscarVenta, todasVentas} = require("../controller/venta");
+const {crearVenta, eliminarVenta, actualizarVenta, listarVentas, buscarVenta, todasVentas, fotosVenta} = require("../controller/venta");
 const {auth} = require("../controller/sesiones");
 
 const router=Router();
@@ -18,4 +18,6 @@ router.get('/listarVenta/', auth, listarVentas);
 router.get('/buscarVenta/:idVenta', buscarVenta);
 //lista todas las ventas de la base de datos, no necesita autenticación
 router.get('/todasVenta/', todasVentas);
+// recibir los nombres de las fotos de una venta
+router.get('/fotosVenta/:idVenta', fotosVenta);
 module.exports=router;

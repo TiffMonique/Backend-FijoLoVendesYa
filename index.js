@@ -43,7 +43,7 @@ app.use(express.json());
 // Sirve para hacer que el body se reciba correctamente
 app.use(bodyParser.urlencoded({ extended: false }));
 
-
+app.use(express.static('./public/'));
 
 
 try {

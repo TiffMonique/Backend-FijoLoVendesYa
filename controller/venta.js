@@ -3,9 +3,11 @@ const pool = require("../database/database");
 const ventasMD = require("../models/VentasMD.js");
 const modeloCategorias = require("../models/CategoriasMD.js");
 const modeloUsuarios = require("../models/UsuariosMD.js");
+const modeloFotosVentas = require("../models/fotosVentas");
 const multer = require("multer");
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const { json } = require("body-parser");
 
 //Configuración multer
 const storage = multer.diskStorage({
@@ -38,6 +40,7 @@ const upload = multer({
 
 const crearVenta =  async (req, res) => {
    await upload.array('foto', 10) (req, res, async function (err) {
+    console.log(req.files);
     if (req.files.length > 0) {
       if (err instanceof multer.MulterError) {
         res.status(400).json("Error multer: " + err.message)
@@ -62,8 +65,13 @@ const crearVenta =  async (req, res) => {
             idUsuario,
             fechaPublicacion,
           };
+          
           try {
             const respuesta = await ventasMD.create(venta);
+            const fotos = req.files.map(foto => { return {nombre: foto.filename, idVenta: respuesta.idVenta} });
+            console.log("req.files: "+req.files);
+            console.log("Arreglo de fotos: "+fotos);
+            await modeloFotosVentas.bulkCreate(fotos);
             res.status(200).json({
               message: "Venta Registrada exitosamente",
               venta: respuesta,
@@ -266,6 +274,19 @@ const buscarVenta = async (req, res) => {
   }
 };
 
+const fotosVenta = async (req, res) => {
+  const idVenta = req.params.idVenta;
+  try {
+    const fotos = await modeloFotosVentas.findAll({
+      where: {idVenta:idVenta},
+    });
+    const nombres = fotos.map(foto => foto.nombre)
+    res.status(200).json(nombres);
+  } catch (err) {
+    res.status(400).json(err.message);
+  }
+}
+
 module.exports = {
   crearVenta,
   eliminarVenta,
@@ -273,4 +294,5 @@ module.exports = {
   listarVentas,
   buscarVenta,
   todasVentas,
+  fotosVenta,
 };
