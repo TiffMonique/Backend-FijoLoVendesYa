@@ -31,7 +31,7 @@ const insertarCategoria = async (req, res) => {
     await modeloCategorias.create(req.body);
     res.json({ message: "Categoria registrada correctamente" });
   } catch (error) {
-    res.json({ message: error.message });
+    res.json({ message: "Ha ocurrido un error", error: error.message });
   }
 };
 
@@ -44,7 +44,7 @@ const modificarCategoria = async (req, res) => {
     });
     res.json({ message: "Categoría actualizada correctamente" });
   } catch (error) {
-    res.json({ message: error.message });
+    res.json({ message: "Ha ocurrido un error", error: error.message });
   }
 };
 
@@ -56,7 +56,9 @@ const eliminarCategoria = async (req, res) => {
     });
     res.json({ message: "Categoria eliminada correctamente" });
   } catch (error) {
-    res.json({ message: error.message });
+    res
+      .status(400)
+      .json({ message: "Ha ocurrido un error", error: error.message });
   }
 };
 
