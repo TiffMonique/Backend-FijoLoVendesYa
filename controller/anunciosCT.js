@@ -10,8 +10,8 @@ const crearAnuncio = async(req, res) => {
     const { idVenta, descripcion } = req.body;
     const now = new Date();
     const fechaInicio = now.getTime();
-    const dias = 1;
-    const fechaFin = fechaInicio + 864000*dias;
+    const dias = 60;
+    const fechaFin = fechaInicio + 86400000*dias;
     console.log(fechaFin);
     const anuncio = {idVenta, descripcion, fechaInicio, fechaFin}
     try {
@@ -28,14 +28,74 @@ const crearAnuncio = async(req, res) => {
 const eliminarAnuncio = async(req, res) => {
     const idAnuncio = req.params.idAnuncio;
     try {
-        respuesta = await anunciosMD.destroy({ where: {idAnncio : idAnuncio}})
+        await anunciosMD.destroy({ where: {idAnncio : idAnuncio}})
         res.status(200).json({message: "Anuncio eliminado correctamente"})
     }catch(err) {
         res.status(400).json({message: err.message})
     }
 }
 
+const actualizarAnuncio = async(req, res) => {
+    const idAnuncio = req.params.idAnuncio;
+    const descripcion = req.body.descripcion;
+    const anuncio = {
+        descripcion:descripcion
+    }
+    try {
+        await anunciosMD.update(anuncio, {where: { idAnncio: idAnuncio }});
+        res.status(200).json({message: "Anuncio actualizado correctamente"});
+    } catch (err) {
+        res.status(400).json({message: err.message})
+    }
+}
+
+const unAnuncio = async (req, res) => {
+    const idAnuncio = req.params.idAnuncio;
+    try{
+        const anuncio = await anunciosMD.findAll({where: { idAnncio: idAnuncio }});
+        if (anuncio.length>0) {
+            res.status(200).json(anuncio[0]);
+        } else {
+            res.status(400).json({message: "No se encontró el anuncio"})
+        }
+        
+    } catch (err) {
+        res.status(400).json({message: err.message})
+    }
+}
+
+const todosAnuncio = async (req, res) => {
+    const idAnuncio = req.params.idAnuncio;
+    try{
+        const anuncios = await anunciosMD.findAll();
+        if (anuncios.length>0) {
+            res.status(200).json(anuncios);
+        } else {
+            res.status(400).json({message: "No se encontró ningún anuncio"})
+        }
+    } catch (err) {
+        res.status(400).json({message: err.message})
+    }
+}
+
+const anunciosVenta = async (req, res) => {
+    const idVenta = req.params.idVenta;
+    try{
+        const anuncios = await anunciosMD.findAll({where: { idVenta: idVenta }});
+        if (anuncios.length>0) {
+            res.status(200).json(anuncios);
+        } else {
+            res.status(400).json({message: "No se encontró ningún anuncio"})
+        }
+    } catch (err) {
+        res.status(400).json({message: err.message})
+    }
+}
 module.exports = {
     crearAnuncio,
-    eliminarAnuncio
+    eliminarAnuncio,
+    actualizarAnuncio,
+    unAnuncio,
+    todosAnuncio,
+    anunciosVenta
 }
