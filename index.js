@@ -63,6 +63,12 @@ app.use('/api/tienda', require('./routes/RTcalificaciones.js'));
 app.use('/api/tienda', require('./routes/RTCategorias.js'));
 app.use('/api/tienda', require('./routes/RTroles.js'));
 app.use('/api/tienda', require('./routes/RTusuarios.js'));
+<<<<<<< Updated upstream
+app.use('/api/tienda', require('./routes/RTanuncios.js'));
+=======
+app.use('/api/tienda',require('./routes/RTrestaurarpass.js'));
+app.use('/api/tienda', require('./routes/RTdenuncias.js'));
+>>>>>>> Stashed changes
 //app.use('/api/tienda', require('./routes/routesCategorias.js'));
 //app.use('/api/tienda', require('./routes/routesUsuarios.js'));
 // Estáticos

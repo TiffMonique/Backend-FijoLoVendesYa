@@ -4,7 +4,7 @@ const router = express.Router(); // para las rutas
 const db = require('../database/database'); // no se está usando
 const bcrypt = require('bcrypt'); // para encriptar
 const saltRounds = 10; // el tamaño o dificultad del Salt de la encriptación
-
+var randtoken = require('rand-token');
 
 // para ver todos los usuarios con todos sus datos
 // es inutil
@@ -36,7 +36,8 @@ const crear = async (req, res) => {
                     telefono: telefono,
                     pass: pass,
                     direccion: direccion,
-                    idrol: 2
+                    idrol: 2,
+                    token:randtoken.generate(20)
                 };
 
                 // Encriptando contrasenia
