@@ -14,6 +14,7 @@ INSERT INTO Roles
 VALUES(2, 'Vendedor', 'publicar ventas en la apliacion', NULL, NULL);
 SELECT * FROM Roles;
 
+
 create table Usuarios(
 	idUsuarios int primary key auto_increment, 
     nombre varchar(60) not null, 
@@ -133,7 +134,5 @@ create table Suscripciones(
 	direccion varchar(1000) not null);*/
                     
                     
-insert into roles values(1, "usuario", "comprar", null, null);
-
 
 SELECT * FROM Usuarios inner join roles on Roles.idRol = Usuarios.idRol WHERE correo = "tmonique@gmail.com"
