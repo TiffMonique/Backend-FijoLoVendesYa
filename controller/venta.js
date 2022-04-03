@@ -5,20 +5,20 @@ const modeloCategorias = require("../models/CategoriasMD.js");
 const modeloUsuarios = require("../models/UsuariosMD.js");
 const modeloFotosVentas = require("../models/fotosVentas");
 const multer = require("multer");
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 const { json } = require("body-parser");
 
 //Configuración multer
 const storage = multer.diskStorage({
-  destination: './public/uploads/', 
+  destination: "./public/uploads/",
   filename: (req, file, cb) => {
-      cb(null, uuidv4() + path.extname(file.originalname).toLocaleLowerCase())
+    cb(null, uuidv4() + path.extname(file.originalname).toLocaleLowerCase());
   },
-})
+});
 
 const limits = {
-  fileSize: 5000000
+  fileSize: 5000000,
 };
 
 const fileFilter = (req, file, cb) => {
@@ -26,68 +26,69 @@ const fileFilter = (req, file, cb) => {
   const mimetype = fileTypes.test(file.mimetype);
   const extname = fileTypes.test(path.extname(file.originalname));
   if (mimetype && extname) {
-      return cb(null, true);
+    return cb(null, true);
   }
-  cb("Error: Archivo debe ser una imagen válida")
-}
+  cb("Error: Archivo debe ser una imagen válida");
+};
 
 //instancia multer con su configuración
 const upload = multer({
   storage: storage,
   limits: limits,
-  fileFilter: fileFilter
+  fileFilter: fileFilter,
 });
 
-const crearVenta =  async (req, res) => {
-   await upload.array('foto', 10) (req, res, async function (err) {
+const crearVenta = async (req, res) => {
+  await upload.array("foto", 10)(req, res, async function (err) {
     console.log(req.files);
     if (req.files.length > 0) {
       if (err instanceof multer.MulterError) {
-        res.status(400).json("Error multer: " + err.message)
+        res.status(400).json("Error multer: " + err.message);
       } else if (err) {
-          res.status(500).json("Error: " + err.message)
-      } else if (req.files[0]){
-          // Lo anterior de ventas sin foto
-          const { estado, categoria, producto, cantidad, descripcion, precio } =
+        res.status(500).json("Error: " + err.message);
+      } else if (req.files[0]) {
+        // Lo anterior de ventas sin foto
+        const { estado, categoria, producto, cantidad, descripcion, precio } =
           req.body;
-          console.log(estado);
-          console.log(req.body);
-          const idUsuario = req.session.user;
-          let now = new Date();
-          const fechaPublicacion = now.getTime();
-          const venta = {
-            estado,
-            categoria,
-            producto,
-            cantidad,
-            descripcion,
-            precio,
-            idUsuario,
-            fechaPublicacion,
-          };
-          
-          try {
-            const respuesta = await ventasMD.create(venta);
-            const fotos = req.files.map(foto => { return {nombre: foto.filename, idVenta: respuesta.idVenta} });
-            console.log("req.files: "+req.files);
-            console.log("Arreglo de fotos: "+fotos);
-            await modeloFotosVentas.bulkCreate(fotos);
-            res.status(200).json({
-              message: "Venta Registrada exitosamente",
-              venta: respuesta,
-            });
-          } catch (error) {
-            res.status(400).json({ message: error.message });
-          }
+        console.log(estado);
+        console.log(req.body);
+        const idUsuario = req.session.user;
+        let now = new Date();
+        const fechaPublicacion = now.getTime();
+        const venta = {
+          estado,
+          categoria,
+          producto,
+          cantidad,
+          descripcion,
+          precio,
+          idUsuario,
+          fechaPublicacion,
+        };
+
+        try {
+          const respuesta = await ventasMD.create(venta);
+          const fotos = req.files.map((foto) => {
+            return { nombre: foto.filename, idVenta: respuesta.idVenta };
+          });
+          console.log("req.files: " + req.files);
+          console.log("Arreglo de fotos: " + fotos);
+          await modeloFotosVentas.bulkCreate(fotos);
+          res.status(200).json({
+            message: "Venta Registrada exitosamente",
+            venta: respuesta,
+          });
+        } catch (error) {
+          res.status(400).json({ message: error.message });
+        }
       } else {
-          res.status(500).json({message:"No hay imagenes"})
+        res.status(500).json({ message: "No hay imagenes" });
       }
     } else {
-      res.status(400).json({message: "No hay fotos"})
+      res.status(400).json({ message: "No hay fotos" });
     }
-      
   });
-}
+};
 // Inserta una venta con todo y su detalle
 // estado es bool, categoría es int, debe existir la categoría
 /*const crearVenta = async (req, res) => {
@@ -139,7 +140,7 @@ const eliminarVenta = async (req, res) => {
       await ventasMD.destroy({
         where: { idVenta: idVenta },
       });
-      res.status(200).json({ message: "Vena eliminada exitosamente" });
+      res.status(200).json({ message: "Venta eliminada exitosamente" });
     } else {
       res.status(401).json({ message: "No se pudo eliminar la venta" });
     }
@@ -282,14 +283,14 @@ const fotosVenta = async (req, res) => {
   const idVenta = req.params.idVenta;
   try {
     const fotos = await modeloFotosVentas.findAll({
-      where: {idVenta:idVenta},
+      where: { idVenta: idVenta },
     });
-    const nombres = fotos.map(foto => foto.nombre)
+    const nombres = fotos.map((foto) => foto.nombre);
     res.status(200).json(nombres);
   } catch (err) {
     res.status(400).json(err.message);
   }
-}
+};
 
 module.exports = {
   crearVenta,
