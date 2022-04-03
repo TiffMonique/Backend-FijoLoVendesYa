@@ -122,6 +122,7 @@ const crearVenta =  async (req, res) => {
 const eliminarVenta = async (req, res) => {
   const idVenta = req.params.idVenta;
   const idUsuario = req.session.user;
+  console.log(idVenta);
   try {
     const venta = await ventasMD.findAll({
       attributes: [[Sequelize.fn("COUNT", Sequelize.col("idVenta")), "cuenta"]],
@@ -132,6 +133,9 @@ const eliminarVenta = async (req, res) => {
     });
     console.log(venta);
     if (venta[0].dataValues.cuenta > 0) {
+      await modeloFotosVentas.destroy({
+        where: { idVenta: idVenta },
+      });
       await ventasMD.destroy({
         where: { idVenta: idVenta },
       });
