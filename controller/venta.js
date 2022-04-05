@@ -277,7 +277,7 @@ const buscarVenta = async (req, res) => {
   } catch (error) {
     res.json({ message: error.message });
   }
-};
+}; 
 
 const fotosVenta = async (req, res) => {
   const idVenta = req.params.idVenta;
