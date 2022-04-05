@@ -73,6 +73,7 @@ app.use("/api/tienda", require("./routes/RTusuarios.js"));
 app.use("/api/tienda", require("./routes/RTrestaurarpass.js"));
 app.use("/api/tienda", require("./routes/RTdenuncias.js"));
 app.use('/api/tienda', require('./routes/RTsuscripciones.js'));
+app.use('/api/tienda', require('./routes/RTFotos.js'));
 //app.use('/api/tienda', require('./routes/routesCategorias.js'));
 //app.use('/api/tienda', require('./routes/routesUsuarios.js'));
 // Estáticos
