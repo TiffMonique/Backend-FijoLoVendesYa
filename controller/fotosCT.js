@@ -4,6 +4,7 @@ const multer = require("multer");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 const fs = require('fs');
+const { Sequelize } = require("sequelize");
 //Configuración multer
 const storage = multer.diskStorage({
     destination: "./public/uploads/",
@@ -51,13 +52,23 @@ const subirFotos = async(req, res) => {
                 const suyo = (await ventasMD.findAll({where: {idVenta: idVenta, idUsuario:idUsuario}})).length>0;
                 if (respuesta.length>0) {
                     if (suyo) {
-                        const fotos = req.files.map((foto) => {return { nombre: foto.filename, idVenta: respuesta[0].idVenta }});
-                        const fotosBD = await modeloFotosVentas.bulkCreate(fotos);
-                        const fotosNombre = fotosBD.map((foto) => foto.nombre);
-                        res.status(200).json({
-                            message: "Fotos subidas correctamente",
-                            fotos: fotosNombre
+                        var fotos = await modeloFotosVentas.findAll({
+                            attributes: [[Sequelize.fn("COUNT", Sequelize.col("idVenta")), "cuenta"]],
+                            where: {
+                                idVenta: idVenta,
+                            },
                         });
+                        if (fotos[0].dataValues.cuenta + req.files.length < 11) {
+                            const fotos = req.files.map((foto) => {return { nombre: foto.filename, idVenta: respuesta[0].idVenta }});
+                            const fotosBD = await modeloFotosVentas.bulkCreate(fotos);
+                            const fotosNombre = fotosBD.map((foto) => foto.nombre);
+                            res.status(200).json({
+                                message: "Fotos subidas correctamente",
+                                fotos: fotosNombre
+                            });
+                        } else {
+                            res.status(400).json({message: "No puede agregar más de 10 fotos por venta"});
+                        }
                     }else {
                         res.status(401).json({message: "Usted no puede agregar fotos a esta venta"});
                     }

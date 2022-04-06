@@ -288,7 +288,7 @@ const fotosVenta = async (req, res) => {
       where: { idVenta: idVenta },
     });
     const nombres = fotos.map((foto) => foto.nombre);
-    res.status(200).json(nombres);
+    res.status(200).json({cantidad: nombres.length, nombres});
   } catch (err) {
     res.status(400).json(err.message);
   }
