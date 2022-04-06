@@ -43,7 +43,9 @@ const crearVenta = async (req, res) => {
     console.log(req.files);
     if (req.files.length > 0) {
       if (err instanceof multer.MulterError) {
-        res.status(400).json("Error multer: " + err.message);
+        if (err.code === "LIMIT_UNEXPECTED_FILE") {
+          res.status(400).json({message: "Debe elegir como máximo 10 imágenes", error: err.message})
+        }
       } else if (err) {
         res.status(500).json("Error: " + err.message);
       } else if (req.files[0]) {
