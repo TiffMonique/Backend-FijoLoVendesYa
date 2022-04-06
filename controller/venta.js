@@ -285,7 +285,7 @@ const fotosVenta = async (req, res) => {
   const idVenta = req.params.idVenta;
   try {
     const fotos = await modeloFotosVentas.findAll({
-      where: { idVenta: idVenta },
+      where: { idVenta: idVenta }, order: [['indice', 'ASC']]
     });
     res.status(200).json(fotos);
   } catch (err) {
