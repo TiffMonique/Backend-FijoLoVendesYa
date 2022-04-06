@@ -23,7 +23,8 @@ create table Usuarios(
     token varchar(20),
     createdAT date,
     updatedAT date,
-    foreign key(idRol) references Roles(idRol));
+    foreign key(idRol) references Roles(idRol)
+    MATCH SIMPLE ON DELETE CASCADE);
     
 -- **************DENUNCIAS*********************
 create table Denuncias(
@@ -34,7 +35,8 @@ create table Denuncias(
 	estado bool not null,
 	createdAT DATE,
 	updatedAT DATE,
-	foreign key(idUsuario) references Usuarios(idUsuarios));
+	foreign key(idUsuario) references Usuarios(idUsuarios)
+    MATCH SIMPLE ON DELETE CASCADE);
     
 -- **************CATEGORIAS*********************
 create table Categorias(
@@ -56,8 +58,10 @@ create table Venta(
 	fechaPublicacion date not null,
 	createdAT DATE,
 	updatedAT DATE,
-	foreign key(idUsuario) references Usuarios(idUsuarios),
-	foreign key(categoria) references Categorias(nombre));
+	foreign key(idUsuario) references Usuarios(idUsuarios)
+    MATCH SIMPLE ON DELETE CASCADE,
+	foreign key(categoria) references Categorias(nombre)
+    MATCH SIMPLE ON DELETE CASCADE);
     
 -- ***************FOTOSVENTA********************
 create table fotosVentas(
@@ -76,7 +80,8 @@ create table Calificaciones(
 	idVenta bigInt,
 	createdAT DATE,
 	updatedAT DATE,
-	foreign key(idVenta) references Venta(idVenta));
+	foreign key(idVenta) references Venta(idVenta)
+    MATCH SIMPLE ON DELETE CASCADE);
     
 -- ************ANUNCIOS***********************
 create table Anuncios(
@@ -87,7 +92,8 @@ create table Anuncios(
 	descripcion varchar(1000),
     createdAT DATE,
 	updatedAT DATE,
-	foreign key(idVenta) references Venta(idVenta));
+	foreign key(idVenta) references Venta(idVenta)
+    MATCH SIMPLE ON DELETE CASCADE);
     
 -- *************SUSCRIPCIONES**********************
 create table Suscripciones(
@@ -97,6 +103,20 @@ create table Suscripciones(
 	fecha datetime not null,
 	createdAT DATE,
 	updatedAT DATE,
-	foreign key(idUsuario) references Usuarios(idUsuarios),
-	foreign key(idCategoria) references Categorias(nombre));
+	foreign key(idUsuario) references Usuarios(idUsuarios)
+    MATCH SIMPLE ON DELETE CASCADE,
+	foreign key(idCategoria) references Categorias(nombre)
+    MATCH SIMPLE ON DELETE CASCADE);
+    
+-- ****************Favoritos**************************
+create table Favoritos(
+	idLista BIGINT PRIMARY KEY AUTO_INCREMENT,
+    idUsuario INT,
+    idVenta BIGINT,
+    createdAT DATE,
+    updatedAT DATE,
+    FOREIGN KEY(idUsuario) REFERENCES Usuarios(idUsuarios) 
+    MATCH SIMPLE ON DELETE CASCADE,
+    FOREIGN KEY(idVenta) REFERENCES Venta(idVenta) 
+    MATCH SIMPLE ON DELETE CASCADE);
     
