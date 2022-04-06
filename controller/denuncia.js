@@ -7,11 +7,12 @@ const router = express.Router(); // para las rutas
 
 //metodo post para crear una denuncia
 const crear_denuncia = async (req, res) => {
-    const {contenido,denunciado} = req.body;
+    const {motivo,contenido,denunciado} = req.body;
     const idUsuario = req.session.user;
    // const denunciado=pool.query("SELECT idUsuario FROM venta WHERE idVenta=?",[idVenta]);
     const denuncia = {
         idUsuario,
+        motivo,
         contenido,
         denunciado:1,
         estado:false,
