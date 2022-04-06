@@ -1,5 +1,5 @@
 const {Router} = require("express");
-const {crearVenta, eliminarVenta, actualizarVenta, listarVentas, buscarVenta, todasVentas, fotosVenta} = require("../controller/venta");
+const {crearVenta, eliminarVenta, actualizarVenta, listarVentas, buscarVenta, todasVentas, fotosVenta, unaFoto} = require("../controller/venta");
 const {auth} = require("../controller/sesiones");
 
 const router=Router();
@@ -20,4 +20,5 @@ router.get('/buscarVenta/:idVenta', buscarVenta);
 router.get('/todasVenta/', todasVentas);
 // recibir los nombres de las fotos de una venta
 router.get('/fotosVenta/:idVenta', fotosVenta);
+router.get('/unaFoto/:idVenta/:indice', unaFoto);
 module.exports=router;

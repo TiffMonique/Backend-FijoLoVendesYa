@@ -58,8 +58,13 @@ const subirFotos = async(req, res) => {
                                 idVenta: idVenta,
                             },
                         });
+                        const indiceMayorBusqueda = await modeloFotosVentas.findAll({
+                            attributes: [[Sequelize.fn("MAX", Sequelize.col("indice")), "indiceM"]],
+                            where: {idVenta: idVenta,},
+                        });
+                        const indiceMayor = indiceMayorBusqueda[0].dataValues.indiceM;
                         if (fotos[0].dataValues.cuenta + req.files.length < 11) {
-                            const fotos = req.files.map((foto) => {return { nombre: foto.filename, idVenta: respuesta[0].idVenta }});
+                            const fotos = req.files.map((foto, posicion) => {return { nombre: foto.filename, idVenta: respuesta[0].idVenta, indice: posicion + indiceMayor + 1}});
                             const fotosBD = await modeloFotosVentas.bulkCreate(fotos);
                             const fotosNombre = fotosBD.map((foto) => foto.nombre);
                             res.status(200).json({

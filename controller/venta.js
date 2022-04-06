@@ -70,8 +70,8 @@ const crearVenta = async (req, res) => {
 
         try {
           const respuesta = await ventasMD.create(venta);
-          const fotos = req.files.map((foto) => {
-            return { nombre: foto.filename, idVenta: respuesta.idVenta };
+          const fotos = req.files.map((foto, posicion) => {
+            return { nombre: foto.filename, idVenta: respuesta.idVenta, indice: posicion};
           });
           console.log("req.files: " + req.files);
           console.log("Arreglo de fotos: " + fotos);
@@ -287,8 +287,25 @@ const fotosVenta = async (req, res) => {
     const fotos = await modeloFotosVentas.findAll({
       where: { idVenta: idVenta },
     });
-    const nombres = fotos.map((foto) => foto.nombre);
-    res.status(200).json({cantidad: nombres.length, nombres});
+    res.status(200).json(fotos);
+  } catch (err) {
+    res.status(400).json(err.message);
+  }
+};
+
+const unaFoto = async (req, res) => {
+  const idVenta = req.params.idVenta;
+  const indice = req.params.indice;
+  try {
+    const foto = await modeloFotosVentas.findOne({
+      where: { idVenta: idVenta, indice:indice },
+    });
+    if (foto) {
+      const nombrefoto = foto.nombre
+      res.status(200).json(nombrefoto)
+    }else {
+      res.status(404).json({message: "No se encuentra esa foto"});
+    }
   } catch (err) {
     res.status(400).json(err.message);
   }
@@ -302,4 +319,5 @@ module.exports = {
   buscarVenta,
   todasVentas,
   fotosVenta,
+  unaFoto
 };

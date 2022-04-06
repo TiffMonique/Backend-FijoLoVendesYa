@@ -63,6 +63,7 @@ create table Venta(
 create table fotosVentas(
 	nombre varchar(100) primary key,
     idVenta bigint,
+	indice int,
     createdAT DATE,
 	updatedAT DATE,
     foreign key(idVenta) references Venta(idVenta)
