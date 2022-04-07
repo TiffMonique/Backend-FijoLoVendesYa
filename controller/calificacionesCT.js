@@ -1,4 +1,30 @@
 const calificacionesMD = require("../models/CalificacionesMD.js");
+const ventasMD = require("../models/VentasMD");
+
+//Agregar calificación
+const calificar = async (req, res) => {
+    const { idVenta, calificacion, comentario,  } = req.body;
+    const idUsuario = req.session.user;
+    const calificacionInsert = {idVenta, idUsuario, calificacion, comentario};
+    try {
+        const venta = await ventasMD.findOne({where: {idVenta}});
+        if (!venta) {
+            res.status(404).json({message: "No se pudo encontrar la venta"});
+        } else if(venta.idUsuario == idUsuario) {
+            res.status(401).json({message: "No puedes calificar tus propias ventas"});
+        } else {
+            const calificacion = await calificacionesMD.findOne({where: {idVenta, idUsuario}});
+            if (!calificacion) {
+                await calificacionesMD.create(calificacionInsert);
+                res.status(200).json({message: "Calificación Guardada"});
+            } else {
+                res.status(401).json({message: "No puede calificar más de una vez la misma venta"});
+            }
+        }
+    } catch (error) {
+        res.status(200).json({message: error.message})
+    }
+}
 
 const unacalificacion = async (req, res) => {
     try {
@@ -11,4 +37,4 @@ const unacalificacion = async (req, res) => {
     }
 }
 
-module.exports =  unacalificacion;
+module.exports = { unacalificacion , calificar};
