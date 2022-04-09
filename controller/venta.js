@@ -4,6 +4,7 @@ const ventasMD = require("../models/VentasMD.js");
 const modeloCategorias = require("../models/CategoriasMD.js");
 const modeloUsuarios = require("../models/UsuariosMD.js");
 const modeloFotosVentas = require("../models/fotosVentas");
+const calificacionesMD = require("../models/CalificacionesMD");
 const multer = require("multer");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
@@ -247,10 +248,15 @@ const listarVentas = async (req, res) => {
       const venta = ventas[index];
       const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
       var ventafoto;
+      const calificacionPromedio = await calificacionesMD.findOne({
+        attributes: [[Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"]],
+        where: {idVenta:venta.idVenta}
+      })
+      var ventafoto;
       if(foto) {
-        ventafoto = {...venta.dataValues, foto: foto.dataValues.nombre}
+        ventafoto = {...venta.dataValues, foto: foto.dataValues.nombre, calificacion: calificacionPromedio.dataValues.promedio}
       } else {
-        ventafoto = {...venta.dataValues}
+        ventafoto = {...venta.dataValues, calificacion: calificacionPromedio.dataValues.promedio}
       }
       ventasfoto.push(ventafoto);
     }
@@ -283,11 +289,15 @@ const todasVentas = async (req, res) => {
     for (let index = 0; index < ventas.length; index++) {
       const venta = ventas[index];
       const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
+      const calificacionPromedio = await calificacionesMD.findOne({
+        attributes: [[Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"]],
+        where: {idVenta:venta.idVenta}
+      })
       var ventafoto;
       if(foto) {
-        ventafoto = {...venta.dataValues, foto: foto.dataValues.nombre}
+        ventafoto = {...venta.dataValues, foto: foto.dataValues.nombre, calificacion: calificacionPromedio.dataValues.promedio}
       } else {
-        ventafoto = {...venta.dataValues}
+        ventafoto = {...venta.dataValues, calificacion: calificacionPromedio.dataValues.promedio}
       }
       ventasfoto.push(ventafoto);
     }
