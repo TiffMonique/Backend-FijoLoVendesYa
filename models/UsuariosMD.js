@@ -11,7 +11,6 @@ const modeloUsuarios = db.define('Usuarios', {
     pass: Sequelize.STRING,
     direccion: Sequelize.STRING,
     departamento: Sequelize.STRING,
-    imagen: Sequelize.BOOLEAN,
     idRol: {type: Sequelize.INTEGER, foreignKey:true},
 })
 

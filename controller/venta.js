@@ -238,9 +238,24 @@ const listarVentas = async (req, res) => {
       include: [modeloUsuarios, modeloCategorias],
       where: {
         idUsuario: idUsuario,
-      },
+      }, limit: [0,3]
     });
-    res.json(ventas);
+    var fotos = [];
+    var ventasfoto = [];
+    // buscando la primera foto de cada venta
+    for (let index = 0; index < ventas.length; index++) {
+      const venta = ventas[index];
+      const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
+      var ventafoto;
+      if(foto) {
+        ventafoto = {...venta.dataValues, foto: foto.dataValues.nombre}
+      } else {
+        ventafoto = {...venta.dataValues}
+      }
+      ventasfoto.push(ventafoto);
+    }
+    console.log("fotos despues de foreach" , fotos)
+    res.json(ventasfoto);
   } catch (error) {
     res.json({ message: error.message });
   }
