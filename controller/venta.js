@@ -238,7 +238,7 @@ const listarVentas = async (req, res) => {
       include: [modeloUsuarios, modeloCategorias],
       where: {
         idUsuario: idUsuario,
-      }, limit: [0,3]
+      },
     });
     var fotos = [];
     var ventasfoto = [];
