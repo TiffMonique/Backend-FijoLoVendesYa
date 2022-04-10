@@ -42,6 +42,7 @@ create table Denuncias(
 create table Categorias(
 	nombre varchar(50) primary key,
 	descripcion varchar(255),
+	foto: varchar(100),
 	createdAT DATE,
 	updatedAT DATE);
     
