@@ -5,92 +5,32 @@ const modeloCategorias = require("../models/CategoriasMD.js");
 const modeloUsuarios = require("../models/UsuariosMD.js");
 const modeloFotosVentas = require("../models/fotosVentas");
 const calificacionesMD = require("../models/CalificacionesMD");
-const multer = require("multer");
-const path = require("path");
-const { v4: uuidv4 } = require("uuid");
-const { json } = require("body-parser");
-
-//Configuración multer
-const storage = multer.diskStorage({
-  destination: "./public/uploads/",
-  filename: (req, file, cb) => {
-    cb(null, uuidv4() + path.extname(file.originalname).toLocaleLowerCase());
-  },
-});
-
-const limits = {
-  fileSize: 5000000,
-};
-
-const fileFilter = (req, file, cb) => {
-  const fileTypes = /jpeg|jpg|png|gif/;
-  const mimetype = fileTypes.test(file.mimetype);
-  const extname = fileTypes.test(path.extname(file.originalname));
-  if (mimetype && extname) {
-    return cb(null, true);
-  }
-  cb("Error: Archivo debe ser una imagen válida");
-};
-
-//instancia multer con su configuración
-const upload = multer({
-  storage: storage,
-  limits: limits,
-  fileFilter: fileFilter,
-});
+const { subirVarias } = require('../multerfotos/multerfoto')
 
 const crearVenta = async (req, res) => {
-  await upload.array("foto", 10)(req, res, async function (err) {
-    console.log(req.files);
-    if (req.files.length > 0) {
-      if (err instanceof multer.MulterError) {
-        if (err.code === "LIMIT_UNEXPECTED_FILE") {
-          res.status(400).json({message: "Debe elegir como máximo 10 imágenes", error: err.message})
-        }
-      } else if (err) {
-        res.status(500).json("Error: " + err.message);
-      } else if (req.files[0]) {
-        // Lo anterior de ventas sin foto
-        const { estado, categoria, producto, cantidad, descripcion, precio } =
-          req.body;
-        console.log(estado);
-        console.log(req.body);
-        const idUsuario = req.session.user;
-        let now = new Date();
-        const fechaPublicacion = now.getTime();
-        const venta = {
-          estado,
-          categoria,
-          producto,
-          cantidad,
-          descripcion,
-          precio,
-          idUsuario,
-          fechaPublicacion,
-        };
-
-        try {
-          const respuesta = await ventasMD.create(venta);
-          const fotos = req.files.map((foto, posicion) => {
-            return { nombre: foto.filename, idVenta: respuesta.idVenta, indice: posicion};
-          });
-          console.log("req.files: " + req.files);
-          console.log("Arreglo de fotos: " + fotos);
-          await modeloFotosVentas.bulkCreate(fotos);
-          res.status(200).json({
-            message: "Venta Registrada exitosamente",
-            venta: respuesta,
-          });
-        } catch (error) {
-          res.status(400).json({ message: error.message });
-        }
-      } else {
-        res.status(500).json({ message: "No hay imagenes" });
-      }
-    } else {
-      res.status(400).json({ message: "No hay fotos" });
+  subirVarias(req, res, true, 10, async (req, res) => {
+    const { estado, categoria, producto, cantidad, descripcion, precio } = req.body;
+    console.log(req.body);
+    const idUsuario = req.session.user;
+    let now = new Date();
+    const fechaPublicacion = now.getTime();
+    const venta = {...req.body, idUsuario, fechaPublicacion,};
+    try {
+      const respuesta = await ventasMD.create(venta);
+      const fotos = req.files.map((foto, posicion) => {
+        return { nombre: foto.filename, idVenta: respuesta.idVenta, indice: posicion};
+      });
+      //console.log("req.files: " + req.files);
+      //console.log("Arreglo de fotos: " + fotos);
+      await modeloFotosVentas.bulkCreate(fotos);
+      res.status(200).json({
+        message: "Venta Registrada exitosamente",
+        venta: respuesta,
+      });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
     }
-  });
+  })
 };
 // Inserta una venta con todo y su detalle
 // estado es bool, categoría es int, debe existir la categoría
@@ -311,10 +251,19 @@ const todasVentas = async (req, res) => {
 const buscarVenta = async (req, res) => {
   const idVenta = req.params.idVenta;
   try {
-    const venta = await ventasMD.findAll({
+    const venta = await ventasMD.findOne({
       where: { idVenta: idVenta },
     });
-    res.json(venta[0]);
+    const fotos = await modeloFotosVentas.findAll({
+      where: { idVenta: idVenta }, order: [['indice', 'ASC']]
+    });
+    var nombresfotos = []
+    if (fotos.length>0) {
+      nombresfotos = fotos.map(foto => foto.nombre);
+      res.json({...venta.dataValues, fotos: nombresfotos});
+    }else {
+      res.json(venta.dataValues);
+    }
   } catch (error) {
     res.json({ message: error.message });
   }
