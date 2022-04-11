@@ -1,5 +1,5 @@
 const {Router} = require("express");
-const {crearVenta, eliminarVenta, actualizarVenta, listarVentas, buscarVenta, todasVentas, fotosVenta, unaFoto} = require("../controller/venta");
+const {crearVenta, eliminarVenta, actualizarVenta, listarVentas, buscarVenta, todasVentas, fotosVenta, unaFoto, busqueda} = require("../controller/venta");
 const {auth} = require("../controller/sesiones");
 
 const router=Router();
@@ -21,4 +21,8 @@ router.get('/todasVenta/', todasVentas);
 // recibir los nombres de las fotos de una venta
 router.get('/fotosVenta/:idVenta', fotosVenta);
 router.get('/unaFoto/:idVenta/:indice', unaFoto);
+//realiza la bisqueda de ventas con palabras clave, por categorías y por precio y departamento
+//la peticion debe tener la forma http://localhost:4000/api/tienda/buscar?busqueda=palabras clave&categoria=nombrecategoria&departamento=departamento&precioMin=10&precioMax=100
+//todos los parametros son opcionales
+router.get('/buscar', busqueda);
 module.exports=router;

@@ -1,11 +1,12 @@
-const { Sequelize } = require("sequelize");
+const { Sequelize, Op } = require("sequelize");
 const pool = require("../database/database");
 const ventasMD = require("../models/VentasMD.js");
 const modeloCategorias = require("../models/CategoriasMD.js");
 const modeloUsuarios = require("../models/UsuariosMD.js");
 const modeloFotosVentas = require("../models/fotosVentas");
 const calificacionesMD = require("../models/CalificacionesMD");
-const { subirVarias } = require('../multerfotos/multerfoto')
+const { subirVarias } = require('../multerfotos/multerfoto');
+const { query } = require("express");
 
 const crearVenta = async (req, res) => {
   subirVarias(req, res, true, 10, async (req, res) => {
@@ -299,6 +300,148 @@ const unaFoto = async (req, res) => {
   }
 };
 
+const busqueda = (req, res) => {
+  var consulta = "";
+  var busquedaCase = "";
+  var busquedaCondicion = "";
+  var busquedaOrder = "";
+  var categoriaQuery = "";
+  var departamentoQuery = "";
+  var precioQuery="";
+  if (req.query.busqueda) {
+    const separado = req.query.busqueda.split(' ').filter(Boolean);
+    separado.forEach((palabra, indice) => {
+      interno= indice==0 ?palabra:interno+'|'+palabra;
+    });
+    const expresion =  interno;
+    busquedaCase = `
+    ,(CASE WHEN producto like "%${req.query.busqueda}%" THEN 1 ELSE 0 END +
+      CASE WHEN venta.descripcion like "%${req.query.busqueda}%" THEN 1 ELSE 0 END +
+      CASE WHEN producto regexp "${expresion}" THEN 1 ELSE 0 END + 
+      CASE WHEN venta.descripcion regexp "${expresion}" THEN 1 ELSE 0 END) as ordenar
+    `;
+    busquedaCondicion = `
+      and (
+        producto like "%${req.query.busqueda}%" or
+        venta.descripcion like "%${req.query.busqueda}%" or
+        producto regexp "${expresion}" or
+        venta.descripcion regexp "${expresion}"
+      )
+    `;
+    busquedaOrder=', ordenar desc';
+  } 
+  if (req.query.categoria) {
+    categoriaQuery= ` and venta.categoria = '${req.query.categoria}'`;
+  }
+  if (req.query.departamento) {
+    departamentoQuery= ` and usuarios.departamento = '${req.query.departamento}'`;
+  }
+  if (req.query.precioMin && req.query.precioMax) {
+    precioQuery= ` and (venta.precio between ${req.query.precioMin} and ${req.query.precioMax})`;
+  } else if(req.query.precioMin) {
+    precioQuery= ` and (venta.precio > ${req.query.precioMin})`;
+  } else if (req.query.precioMax){
+    precioQuery= ` and (venta.precio < ${req.query.precioMax})`;
+  }
+  consulta = 'select * '+busquedaCase+' from usuarios, venta '+
+  'where (usuarios.idusuarios = venta.idusuario)'+
+  busquedaCondicion+
+  categoriaQuery+
+  departamentoQuery+
+  precioQuery+
+  ' order by fechaPublicacion desc'+
+  busquedaOrder;
+  try {
+    pool.query(consulta)
+    .then(async (ventas) => {
+      var ventasfoto = [];
+      if(ventas) {
+        for (let index = 0; index < ventas.length; index++) {
+          const venta = ventas[index];
+          const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
+          const calificacionPromedio = await calificacionesMD.findOne({
+            attributes: [[Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"]],
+            where: {idVenta:venta.idVenta}
+          })
+          var ventafoto;
+          if(foto) {
+            ventafoto = {...venta, foto: foto.dataValues.nombre, calificacion: calificacionPromedio.dataValues.promedio}
+          } else {
+            ventafoto = {...venta, calificacion: calificacionPromedio.dataValues.promedio}
+          }
+          ventasfoto.push(ventafoto);
+        }
+        res.status(200).json(ventasfoto);
+      } else {
+        res.status(400).json({message: "No se ha encontrado ninguna venta"})
+      }
+/*
+          if (result.length > 0) {
+            res.status(200).json(result);
+          } else {
+            res.status(400).json({message: "No hay resultados para esta búsqueda"});
+          }*/
+        
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    })
+  } catch (err) {
+    res.status(500).json({message: "Eror inesperado", error: err.message})
+  }
+}
+
+const busqueda2 = async (req, res) => {
+  var ventas;
+  if(req.query.busqueda) {
+    const separado = req.query.busqueda.split(' ').filter(Boolean);
+    separado.forEach((palabra, indice) => {
+      interno= indice==0 ?palabra:interno+'|'+palabra;
+    });
+    const expresion =  interno;
+    console.log(expresion);
+    
+    ventas = pool.query()
+    ventas = await ventasMD.findAll({
+      attributes: {include: [[Sequelize.literal(`
+      CASE WHEN producto like "%${req.query.busqueda}%" THEN 1 ELSE 0 END +
+      CASE WHEN descripcion like "%${req.query.busqueda}%" THEN 1 ELSE 0 END +
+      CASE WHEN producto regexp "${expresion}" THEN 1 ELSE 0 END + 
+      CASE WHEN descripcion regexp "%${expresion}%" THEN 1 ELSE 0 END` ), 'parecido']],},
+      where: {
+        [Op.or]: [
+          {producto: {[Op.substring]: req.query.busqueda}},
+          {producto: {[Op.or]: {[Op.regexp]: expresion}}},
+          {descripcion: {[Op.or]: {[Op.regexp]: expresion}}},
+          {descripcion: {[Op.substring]: req.query.busqueda}}
+        ]
+      }, order: [[Sequelize.literal('parecido'), 'DESC'],]
+    })
+  }
+  var ventasfoto = [];
+    // buscando la primera foto de cada venta
+  if(ventas) {
+    for (let index = 0; index < ventas.length; index++) {
+      const venta = ventas[index];
+      const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
+      const calificacionPromedio = await calificacionesMD.findOne({
+        attributes: [[Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"]],
+        where: {idVenta:venta.idVenta}
+      })
+      var ventafoto;
+      if(foto) {
+        ventafoto = {...venta.dataValues, foto: foto.dataValues.nombre, calificacion: calificacionPromedio.dataValues.promedio}
+      } else {
+        ventafoto = {...venta.dataValues, calificacion: calificacionPromedio.dataValues.promedio}
+      }
+      ventasfoto.push(ventafoto);
+    }
+    res.status(200).json(ventasfoto);
+  } else {
+    res.status(400).json({message: "No se ha encontrado ninguna venta"})
+  }
+}
+
 module.exports = {
   crearVenta,
   eliminarVenta,
@@ -307,5 +450,6 @@ module.exports = {
   buscarVenta,
   todasVentas,
   fotosVenta,
-  unaFoto
+  unaFoto,
+  busqueda
 };
