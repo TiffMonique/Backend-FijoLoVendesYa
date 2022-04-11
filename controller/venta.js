@@ -355,7 +355,7 @@ const busqueda = (req, res) => {
     pool.query(consulta)
     .then(async (ventas) => {
       var ventasfoto = [];
-      if(ventas) {
+      if(ventas.length>0) {
         for (let index = 0; index < ventas.length; index++) {
           const venta = ventas[index];
           const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
@@ -375,13 +375,6 @@ const busqueda = (req, res) => {
       } else {
         res.status(400).json({message: "No se ha encontrado ninguna venta"})
       }
-/*
-          if (result.length > 0) {
-            res.status(200).json(result);
-          } else {
-            res.status(400).json({message: "No hay resultados para esta búsqueda"});
-          }*/
-        
     })
     .catch((err) => {
       res.status(500).send(err);
