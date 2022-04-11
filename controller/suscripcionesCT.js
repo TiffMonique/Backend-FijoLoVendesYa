@@ -18,7 +18,8 @@ const crearSuscripcion = async(req, res) => {
 }
 
 const eliminarSuscripcion = async(req, res) => {
-    const idCategoria = req.body.categoria;
+    const idCategoria = req.params.idCategoria;
+    console.log(req.body)
     const idUsuario = req.session.user;
     try {
         console.log('hola')
