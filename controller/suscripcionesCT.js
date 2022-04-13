@@ -32,14 +32,12 @@ const eliminarSuscripcion = async(req, res) => {
 
 const misSuscripciones = async(req, res) => {
     const idUsuario = req.session.user;
-    console.log('hola')
     try {
         const respuesta = await modeloSuscripciones.findAll({
             where: {
               idUsuario: idUsuario,
             },
           });
-        console.log(respuesta)
         const suscripciones = respuesta.map(item => item.idCategoria)
         res.status(200).json(suscripciones);
     }catch (err) {

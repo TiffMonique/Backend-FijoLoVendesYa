@@ -8,6 +8,7 @@ const auth = require("./sesiones.js");
 
 const logout = async (req, res) => {
   req.session.destroy();
+  //req.session.save();
   res.status(200).json({ message: "Sesión cerrada" });
 };
 
@@ -23,14 +24,15 @@ const login = async (req, res) => {
         res.status(500).send(err);
       } else {
         if (result.length > 0) {
-          console.log(result);
           const comparacion = bcryptjs.compareSync(pass, result[0].pass);
           if (comparacion) {
             req.session.ingresado = true;
             req.session.user = result[0].idUsuarios;
+            var session = req.session;
             //ver si es admin
             req.session.admin = result[0].idRol == 1; // provisional, solo funciona si el rol admin es 2
-            console.log(req.session.admin);
+            console.log(req.session);
+            session.save();
             res.status(200).json({
               message: "Autenticado",
               admin: req.session.admin,
@@ -52,7 +54,7 @@ const login = async (req, res) => {
 
 const sesion = async (req, res) => {
   console.log(req.session);
-  res.json(req.session);
+  res.json({logged:req.session.ingresado, admin:req.session.admin});
 };
 
 module.exports = { login, logout, sesion };
