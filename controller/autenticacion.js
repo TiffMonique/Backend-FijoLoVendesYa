@@ -54,7 +54,7 @@ const login = async (req, res) => {
 
 const sesion = async (req, res) => {
   console.log(req.session);
-  res.json({logged:req.session.ingresado, admin:req.session.admin});
+  res.json({logged:req.session.ingresado, admin:req.session.admin, idSesion:req.session.id});
 };
 
 module.exports = { login, logout, sesion };

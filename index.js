@@ -1,12 +1,19 @@
 //import { Express } from 'express';
 const express = require("express");
 const morgan = require("morgan");
-const path = require("path");
 const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const session_express = require("express-session");
 var MySQLStore = require('express-mysql-session')(session_express);
+var options = {
+  host: 'localhost',
+  port: 3306,
+  user: 'root',
+  password: 'password',
+  database: 'tienda'
+};
+var sessionStore = new MySQLStore(options);
 const session = session_express({
   key: "cookiedesesion",
   secret: "secreto",
@@ -16,14 +23,7 @@ const session = session_express({
   autoSave: true
 });
 
-var options = {
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: 'password',
-  database: 'tienda'
-};
-var sessionStore = new MySQLStore(options);
+
 
 
 const db = require("./database/db.js");
@@ -60,12 +60,9 @@ app.use(cors(corsOptions));
 
 // middlewares
 
-
+// el login
 app.use(session);
-
-
-
-
+// para las cookies
 app.use(cookieParser());
 // hace log de cada petición
 app.use(morgan("dev"));
@@ -112,35 +109,36 @@ const io = require('socket.io')(server, {
     credentials: true
   }
 });
-app.use("/login", (req, res) => {
-  req.session.nombre="nombre"
-  console.log(req.session);
-  res.send('ok')
-})
-const wrap = middleware => (socket, next) => middleware(socket.request, {}, next)
-
 
 io.use(sharedsesssion(session, {autoSave:true}));
 
 
-/*io.use(
-  //wrap(app.get('sesiones'))
-  (socket, next, ) => {
-    sesion(socket.request, socket.request.res || {}, next)
-  }
-);*/
-
+var cuenta = 0;
 io.on('connection', (socket) => {
-  console.log(socket.handshake.session);
-  var session = socket.handshake.session;
-  session.save();
+  //console.log(socket.handshake.session);
   console.log("Usuario conectado: "+socket.id);
+  /* if (!socket.handshake.session.ingresado) {
+    socket.disconnect(true);
+    console.log('desconectado');
+  } */
   socket.on('chat', (msg)=> {
-    console.log(socket.handshake.session);
+    //console.log(socket.handshake.session);
 
     io.emit('respuesta', msg)
   })
+  socket.on('prueba', (msg)=> {
+    cuenta ++;
+    console.log(msg);
+    socket.emit('pruebaregreso', 'mensaje de respuesta'+cuenta);
+    setTimeout(() => {
+      socket.emit('pruebaregreso', 'mensaje de respuesta 2 '+cuenta);
+    }, 3000);
+  })
+  socket.on('disconnect', () => {
+    console.log('desconectado', socket.id)
+  })
 });
+
 server.listen(app.get("port"), () => {
   console.log(`server on port ${app.get("port")}`);
 });
