@@ -2,6 +2,7 @@
 const db = require('../database/db.js');
 const modeloUsuarios = require('../models/UsuariosMD.js');
 const modeloRoles = require('../models/RolesMD.js');
+const { Sequelize } = require("sequelize");
 
 //-----METODOS PARA EL CRUD-----
 //1. MOSTRAR TODOS LOS USUARIOS
@@ -47,20 +48,31 @@ const actualizarUsuario = async(req,res)=>{
         })
         res.json({"Message":"Usuario actualizado exitosamente"})
     } catch (error) {
-        
+        res.json({message: error.message});
     }
 }
 
 //5. ELIMINAR UN USUARIO
 const eliminarUsuario = async(req,res)=>{
     try {
-        await modeloUsuarios.destroy({
-            where:{idUsuarios: req.params.idUsuarios}
-        })
-        res.json({"Message":"Usuario borrado exitosamente"})
+        const usuario = await modeloUsuarios.findAll({
+            where: {
+                idUsuarios: req.params.idUsuarios
+            }
+        });
+        console.log(usuario);
+        if(usuario.length>0){
+            await  modeloUsuarios.destroy({
+                where:{idUsuarios: req.params.idUsuarios}
+        });
+        res.json({ message: "Eliminado exitosamente" });   
+        }else{
+            res.status(401).json({message: "Ya fue eliminado" });  
+        }
     } catch (error) {
-        res.json({"Message":"Usuario actualizado exitosamente"})
+        res.json({message: error.message});
     }
 }
+
 
 module.exports = {obtenerUsuarios, unUsuario, insertarUsuario, actualizarUsuario, eliminarUsuario};

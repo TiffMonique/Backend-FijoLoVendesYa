@@ -8,8 +8,7 @@ const denunciaMD = db.define('Denuncias', {
     idUsuario: { type: DataTypes.INTEGER, foreignKey: true},
     motivo:{type: DataTypes.STRING},
     contenido: {type: DataTypes.STRING},
-    denunciado: { type: DataTypes.INTEGER, foreignKey: true},
-    estado:{ type:DataTypes.BOOLEAN},
+    denunciado: { type: DataTypes.INTEGER, foreignKey: true}
 })
 
 
