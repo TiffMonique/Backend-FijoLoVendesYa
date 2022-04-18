@@ -5,10 +5,26 @@ const path = require("path");
 const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const session = require("express-session");
 const db = require("./database/db.js");
 const cookieParser = require("cookie-parser");
-
+const session_express = require("express-session");
+var MySQLStore = require('express-mysql-session')(session_express);
+var options = {
+  host: 'localhost',
+  port: 3306,
+  user: 'root',
+  password: 'password',
+  database: 'tienda'
+};
+var sessionStore = new MySQLStore(options);
+const session = session_express({
+  key: "cookiedesesion",
+  secret: "secreto",
+  resave: false,
+  saveUninitialized: false,
+  store:sessionStore,
+  autoSave: true
+});
 //configuracion
 // configurando el puerto
 app.set("port", process.env.PORT || 4000);
@@ -37,11 +53,7 @@ app.use(cors(corsOptions));
 // middlewares
 
 app.use(
-  session({
-    secret: "secreto",
-    resave: true,
-    saveUninitialized: true,
-  })
+  session
 );
 app.use(cookieParser());
 // hace log de cada petición

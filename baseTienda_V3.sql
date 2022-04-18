@@ -121,4 +121,12 @@ create table Favoritos(
     MATCH SIMPLE ON DELETE CASCADE,
     FOREIGN KEY(idVenta) REFERENCES Venta(idVenta) 
     MATCH SIMPLE ON DELETE CASCADE);
+
+-- ****************Sesiones**************************
+CREATE TABLE `sessions` (
+  `session_id` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `expires` int unsigned NOT NULL,
+  `data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  PRIMARY KEY (`session_id`)
+)
     
