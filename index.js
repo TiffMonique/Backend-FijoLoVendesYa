@@ -117,10 +117,10 @@ var cuenta = 0;
 io.on('connection', (socket) => {
   //console.log(socket.handshake.session);
   console.log("Usuario conectado: "+socket.id);
-  /* if (!socket.handshake.session.ingresado) {
+  if (!socket.handshake.session.ingresado) {
     socket.disconnect(true);
-    console.log('desconectado');
-  } */
+    console.log('desconectado, supuestamente');
+  }
   socket.on('chat', (msg)=> {
     //console.log(socket.handshake.session);
 
