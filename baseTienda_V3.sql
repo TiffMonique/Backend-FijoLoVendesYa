@@ -79,6 +79,7 @@ create table Calificaciones(
 	idCalificacion int primary key auto_increment,
 	calificacion int,
 	idVenta bigInt,
+	idUsuario int,
 	createdAT DATE,
 	updatedAT DATE,
 	foreign key(idVenta) references Venta(idVenta)
