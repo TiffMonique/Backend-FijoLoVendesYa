@@ -1,7 +1,6 @@
 //import { Express } from 'express';
 const express = require("express");
 const morgan = require("morgan");
-const path = require("path");
 const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -29,13 +28,13 @@ const session = session_express({
 // configurando el puerto
 app.set("port", process.env.PORT || 4000);
 var corsOptions = {
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000", "http://localhost:3001"],
   credentials: true,
 };
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Credentials", true);
-  //res.header('Access-Control-Allow-Origin', "http://localhost:3000");
+  res.header('Access-Control-Allow-Origin', "http://localhost:3000");
   res.header(
     "Access-Control-Allow-Methods",
     "GET,PUT,POST,DELETE,UPDATE,OPTIONS"
@@ -92,6 +91,45 @@ app.use('/api/tienda', require('./routes/RTFotos.js'));
 //no es necesario
 app.use("/api/tienda", require("./routes/RTanuncios.js"));
 // Iniciar servidor
-app.listen(app.get("port"), () => {
+
+const server = require('http').createServer(app);
+const io = require('socket.io')(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "OPTIONS"],
+    credentials: true
+  }
+});
+
+io.use(sharedsesssion(session, {autoSave:true}));
+
+
+var cuenta = 0;
+io.on('connection', (socket) => {
+  //console.log(socket.handshake.session);
+  console.log("Usuario conectado: "+socket.id);
+  if (!socket.handshake.session.ingresado) {
+    socket.disconnect(true);
+    console.log('desconectado, supuestamente');
+  }
+  socket.on('chat', (msg)=> {
+    //console.log(socket.handshake.session);
+
+    io.emit('respuesta', msg)
+  })
+  socket.on('prueba', (msg)=> {
+    cuenta ++;
+    console.log(msg);
+    socket.emit('pruebaregreso', 'mensaje de respuesta'+cuenta);
+    setTimeout(() => {
+      socket.emit('pruebaregreso', 'mensaje de respuesta 2 '+cuenta);
+    }, 3000);
+  })
+  socket.on('disconnect', () => {
+    console.log('desconectado', socket.id)
+  })
+});
+
+server.listen(app.get("port"), () => {
   console.log(`server on port ${app.get("port")}`);
 });

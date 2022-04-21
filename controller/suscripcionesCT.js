@@ -19,10 +19,8 @@ const crearSuscripcion = async(req, res) => {
 
 const eliminarSuscripcion = async(req, res) => {
     const idCategoria = req.params.idCategoria;
-    console.log(req.body)
     const idUsuario = req.session.user;
     try {
-        console.log('hola')
         await modeloSuscripciones.destroy({where: {idCategoria:idCategoria, idUsuario:idUsuario}});
         res.status(200).json({message: "Desuscrito"})
     }catch (err) {
@@ -32,14 +30,12 @@ const eliminarSuscripcion = async(req, res) => {
 
 const misSuscripciones = async(req, res) => {
     const idUsuario = req.session.user;
-    console.log('hola')
     try {
         const respuesta = await modeloSuscripciones.findAll({
             where: {
               idUsuario: idUsuario,
             },
           });
-        console.log(respuesta)
         const suscripciones = respuesta.map(item => item.idCategoria)
         res.status(200).json(suscripciones);
     }catch (err) {
