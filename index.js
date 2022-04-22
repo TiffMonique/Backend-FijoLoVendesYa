@@ -8,6 +8,7 @@ const db = require("./database/db.js");
 const cookieParser = require("cookie-parser");
 const session_express = require("express-session");
 var MySQLStore = require('express-mysql-session')(session_express);
+var sharedsesssion = require('express-socket.io-session');
 var options = {
   host: 'localhost',
   port: 3306,
@@ -113,7 +114,7 @@ io.on('connection', (socket) => {
     console.log('desconectado, supuestamente');
   }
   socket.on('chat', (msg)=> {
-    //console.log(socket.handshake.session);
+    console.log(msg);
 
     io.emit('respuesta', msg)
   })
