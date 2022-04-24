@@ -1,7 +1,6 @@
 //import { Express } from 'express';
 const express = require("express");
 const morgan = require("morgan");
-const path = require("path");
 const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -9,6 +8,7 @@ const db = require("./database/db.js");
 const cookieParser = require("cookie-parser");
 const session_express = require("express-session");
 var MySQLStore = require('express-mysql-session')(session_express);
+var sharedsesssion = require('express-socket.io-session');
 var options = {
   host: 'localhost',
   port: 3306,
@@ -29,13 +29,13 @@ const session = session_express({
 // configurando el puerto
 app.set("port", process.env.PORT || 4000);
 var corsOptions = {
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000", "http://localhost:3001"],
   credentials: true,
 };
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Credentials", true);
-  //res.header('Access-Control-Allow-Origin', "http://localhost:3000");
+  res.header('Access-Control-Allow-Origin', "http://localhost:3000");
   res.header(
     "Access-Control-Allow-Methods",
     "GET,PUT,POST,DELETE,UPDATE,OPTIONS"
@@ -92,7 +92,21 @@ app.use('/api/tienda', require('./routes/RTestadisticas.js'));
 // Estáticos
 //no es necesario
 app.use("/api/tienda", require("./routes/RTanuncios.js"));
+app.use("/api/tienda", require("./routes/RTchat.js"));
+
 // Iniciar servidor
-app.listen(app.get("port"), () => {
+const server = require('http').createServer(app);
+const io = require('socket.io')(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "OPTIONS"],
+    credentials: true
+  }
+});
+io.use(sharedsesssion(session, {autoSave:true}));
+
+module.exports.io=io;
+require('./sockets/socket');
+server.listen(app.get("port"), () => {
   console.log(`server on port ${app.get("port")}`);
 });

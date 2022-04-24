@@ -328,7 +328,7 @@ const busqueda = (req, res) => {
         venta.descripcion regexp "${expresion}"
       )
     `;
-    busquedaOrder=', ordenar desc';
+    busquedaOrder=' ordenar desc';
   } 
   if (req.query.categoria) {
     categoriaQuery= ` and venta.categoria = '${req.query.categoria}'`;
@@ -349,8 +349,9 @@ const busqueda = (req, res) => {
   categoriaQuery+
   departamentoQuery+
   precioQuery+
-  ' order by fechaPublicacion desc'+
-  busquedaOrder;
+  ' order by'+((busquedaOrder)?busquedaOrder+",":"")+
+  ' fechaPublicacion desc';
+  console.log(consulta);
   try {
     pool.query(consulta)
     .then(async (ventas) => {
