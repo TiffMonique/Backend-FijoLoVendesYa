@@ -86,13 +86,10 @@ app.use("/api/tienda", require("./routes/RTrestaurarpass.js"));
 app.use("/api/tienda", require("./routes/RTdenuncias.js"));
 app.use('/api/tienda', require('./routes/RTsuscripciones.js'));
 app.use('/api/tienda', require('./routes/RTFotos.js'));
-//app.use('/api/tienda', require('./routes/routesCategorias.js'));
-//app.use('/api/tienda', require('./routes/routesUsuarios.js'));
-// Estáticos
-//no es necesario
 app.use("/api/tienda", require("./routes/RTanuncios.js"));
-// Iniciar servidor
+app.use("/api/tienda", require("./routes/RTchat.js"));
 
+// Iniciar servidor
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, {
   cors: {
@@ -101,36 +98,10 @@ const io = require('socket.io')(server, {
     credentials: true
   }
 });
-
 io.use(sharedsesssion(session, {autoSave:true}));
 
-
-var cuenta = 0;
-io.on('connection', (socket) => {
-  //console.log(socket.handshake.session);
-  console.log("Usuario conectado: "+socket.id);
-  if (!socket.handshake.session.ingresado) {
-    socket.disconnect(true);
-    console.log('desconectado, supuestamente');
-  }
-  socket.on('chat', (msg)=> {
-    console.log(msg);
-
-    io.emit('respuesta', msg)
-  })
-  socket.on('prueba', (msg)=> {
-    cuenta ++;
-    console.log(msg);
-    socket.emit('pruebaregreso', 'mensaje de respuesta'+cuenta);
-    setTimeout(() => {
-      socket.emit('pruebaregreso', 'mensaje de respuesta 2 '+cuenta);
-    }, 3000);
-  })
-  socket.on('disconnect', () => {
-    console.log('desconectado', socket.id)
-  })
-});
-
+module.exports.io=io;
+require('./sockets/socket');
 server.listen(app.get("port"), () => {
   console.log(`server on port ${app.get("port")}`);
 });

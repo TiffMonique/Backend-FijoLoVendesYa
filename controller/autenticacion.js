@@ -24,7 +24,10 @@ const login = async (req, res) => {
         res.status(500).send(err);
       } else {
         if (result.length > 0) {
-          const comparacion = bcryptjs.compareSync(pass, result[0].pass);
+          var comparacion;
+          if(pass) {
+            comparacion = bcryptjs.compareSync(pass, result[0].pass);
+          }
           if (comparacion) {
             req.session.ingresado = true;
             req.session.user = result[0].idUsuarios;

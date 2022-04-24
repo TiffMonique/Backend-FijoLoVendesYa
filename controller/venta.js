@@ -349,8 +349,9 @@ const busqueda = (req, res) => {
   categoriaQuery+
   departamentoQuery+
   precioQuery+
-  ' order by'+busquedaOrder+
-  ', fechaPublicacion desc';
+  ' order by'+((busquedaOrder)?busquedaOrder+",":"")+
+  ' fechaPublicacion desc';
+  console.log(consulta);
   try {
     pool.query(consulta)
     .then(async (ventas) => {
