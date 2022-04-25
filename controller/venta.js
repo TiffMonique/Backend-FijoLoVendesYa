@@ -360,6 +360,7 @@ const busqueda = (req, res) => {
         venta.descripcion regexp "${expresion}"
       )
     `;
+
     busquedaOrder = " ordenar desc";
   }
   if (req.query.categoria) {
@@ -375,6 +376,7 @@ const busqueda = (req, res) => {
   } else if (req.query.precioMax) {
     precioQuery = ` and (venta.precio < ${req.query.precioMax})`;
   }
+
   consulta =
     "select * " +
     busquedaCase +
@@ -387,6 +389,7 @@ const busqueda = (req, res) => {
     " order by" +
     (busquedaOrder ? busquedaOrder + "," : "") +
     " fechaPublicacion desc";
+
   console.log(consulta);
   try {
     pool
