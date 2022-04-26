@@ -389,7 +389,7 @@ const ultimasVentas = async (req, res) => {
   try {
     const ventas = await ventasMD.findAll({
       include: [modeloUsuarios, modeloCategorias],
-      limit: 4,
+      limit: 9,
       order: [['idVenta', 'DESC']]
     });var fotos = [];
     var ventasfoto = [];
