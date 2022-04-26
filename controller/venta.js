@@ -385,36 +385,15 @@ const busqueda = (req, res) => {
   }
 }
 
-const busqueda2 = async (req, res) => {
-  var ventas;
-  if(req.query.busqueda) {
-    const separado = req.query.busqueda.split(' ').filter(Boolean);
-    separado.forEach((palabra, indice) => {
-      interno= indice==0 ?palabra:interno+'|'+palabra;
-    });
-    const expresion =  interno;
-    console.log(expresion);
-    
-    ventas = pool.query()
-    ventas = await ventasMD.findAll({
-      attributes: {include: [[Sequelize.literal(`
-      CASE WHEN producto like "%${req.query.busqueda}%" THEN 1 ELSE 0 END +
-      CASE WHEN descripcion like "%${req.query.busqueda}%" THEN 1 ELSE 0 END +
-      CASE WHEN producto regexp "${expresion}" THEN 1 ELSE 0 END + 
-      CASE WHEN descripcion regexp "%${expresion}%" THEN 1 ELSE 0 END` ), 'parecido']],},
-      where: {
-        [Op.or]: [
-          {producto: {[Op.substring]: req.query.busqueda}},
-          {producto: {[Op.or]: {[Op.regexp]: expresion}}},
-          {descripcion: {[Op.or]: {[Op.regexp]: expresion}}},
-          {descripcion: {[Op.substring]: req.query.busqueda}}
-        ]
-      }, order: [[Sequelize.literal('parecido'), 'DESC'],]
-    })
-  }
-  var ventasfoto = [];
+const ultimasVentas = async (req, res) => {
+  try {
+    const ventas = await ventasMD.findAll({
+      include: [modeloUsuarios, modeloCategorias],
+      limit: 4,
+      order: [['idVenta', 'DESC']]
+    });var fotos = [];
+    var ventasfoto = [];
     // buscando la primera foto de cada venta
-  if(ventas) {
     for (let index = 0; index < ventas.length; index++) {
       const venta = ventas[index];
       const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
@@ -430,11 +409,12 @@ const busqueda2 = async (req, res) => {
       }
       ventasfoto.push(ventafoto);
     }
-    res.status(200).json(ventasfoto);
-  } else {
-    res.status(400).json({message: "No se ha encontrado ninguna venta"})
+    console.log("fotos despues de foreach" , fotos)
+    res.json(ventasfoto);
+  } catch (error) {
+    res.json({ message: error.message });
   }
-}
+};
 
 module.exports = {
   crearVenta,
@@ -445,5 +425,6 @@ module.exports = {
   todasVentas,
   fotosVenta,
   unaFoto,
-  busqueda
+  busqueda,
+  ultimasVentas
 };
