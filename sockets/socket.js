@@ -1,15 +1,25 @@
 
 const { io } = require('../index')
-const { validarConexion } = require('../controller/socketCT')
+const { validarConexion, misChats } = require('../controller/socketCT')
 
 var cuenta=0;
-io.on('connection', (socket) => {
-    validarConexion(socket);
-
+io.on('connection', async(socket) => {
+    //validarConexion(socket);
+    var chats = await misChats(socket);
+    var rooms = chats.map((chat)=>chat.idChat);
+    socket.join(rooms)
+    console.log("ROOMS : __________-------------_________"+rooms);
+    socket.emit('mischats', chats);
     
     socket.on('chat', (msg)=> {
         console.log(msg);
         socket.broadcast.emit('respuesta', msg)
+    })
+    socket.on('mensaje', (msg)=> {
+      console.log(msg);
+      var msgg = {...msg, idUsuario:socket.handshake.session.user};
+      socket.to(msg.idChat).emit("mensajenuevo", msgg);
+      socket.emit("mensajenuevo", msgg);
     })
     socket.on('prueba', (msg)=> {
       cuenta ++;

@@ -57,7 +57,7 @@ app.use(
 );
 app.use(cookieParser());
 // hace log de cada petición
-app.use(morgan("dev"));
+//app.use(morgan("dev"));
 // hace que express entienda JSON
 app.use(express.json());
 // Sirve para hacer que el body se reciba correctamente
