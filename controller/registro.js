@@ -19,7 +19,8 @@ router.get('/', async (req, res) => {
 
 //metodo post para crear un usuario
 const crear = async (req, res) => {
-    const { nombre, apellido, correo, telefono, pass, direccion } = req.body;
+    const { nombre, apellido, correo, telefono, pass, direccion, departamento } = req.body;
+    console.log(req.body);
     console.log("nombre", nombre);
     // validando el correo no repita
     consulta = 'SELECT correo FROM Usuarios WHERE correo = ?'
@@ -36,9 +37,11 @@ const crear = async (req, res) => {
                     telefono: telefono,
                     pass: pass,
                     direccion: direccion,
+                    departamento: departamento,
                     idrol: 2,
                     token:randtoken.generate(20)
                 };
+
 
                 // Encriptando contrasenia
                 bcrypt.hash(nuevousuario.pass, saltRounds, (err, hash) => {

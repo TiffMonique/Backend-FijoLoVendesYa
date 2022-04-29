@@ -1,5 +1,15 @@
 const {Router} = require("express");
-const {crearVenta, eliminarVenta, actualizarVenta, listarVentas, buscarVenta, todasVentas, fotosVenta, unaFoto, busqueda} = require("../controller/venta");
+const {crearVenta, 
+    eliminarVenta, 
+    actualizarVenta, 
+    listarVentas, 
+    buscarVenta, 
+    todasVentas, 
+    fotosVenta, 
+    unaFoto, 
+    busqueda,
+    ultimasVentas
+} = require("../controller/venta");
 const {auth} = require("../controller/sesiones");
 
 const router=Router();
@@ -25,4 +35,5 @@ router.get('/unaFoto/:idVenta/:indice', unaFoto);
 //la peticion debe tener la forma http://localhost:4000/api/tienda/buscar?busqueda=palabras clave&categoria=nombrecategoria&departamento=departamento&precioMin=10&precioMax=100
 //todos los parametros son opcionales
 router.get('/buscar', busqueda);
+router.get('/ultimasVentas', ultimasVentas);
 module.exports=router;

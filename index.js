@@ -86,6 +86,11 @@ app.use("/api/tienda", require("./routes/RTrestaurarpass.js"));
 app.use("/api/tienda", require("./routes/RTdenuncias.js"));
 app.use('/api/tienda', require('./routes/RTsuscripciones.js'));
 app.use('/api/tienda', require('./routes/RTFotos.js'));
+app.use('/api/tienda', require('./routes/RTestadisticas.js'));
+//app.use('/api/tienda', require('./routes/routesCategorias.js'));
+//app.use('/api/tienda', require('./routes/routesUsuarios.js'));
+// Estáticos
+//no es necesario
 app.use("/api/tienda", require("./routes/RTanuncios.js"));
 app.use("/api/tienda", require("./routes/RTchat.js"));
 
