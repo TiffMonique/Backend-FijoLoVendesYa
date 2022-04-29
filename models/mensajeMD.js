@@ -8,6 +8,7 @@ const mensajeMD = db.define("mensajes", {
   idChat: { type: DataTypes.INTEGER, foreignKey: true },
   mensaje: { type: DataTypes.STRING },
   fecha: { type: DataTypes.DATE },
+  tipo: { type: DataTypes.STRING }
 });
 mensajeMD.belongsTo(modeloUsuarios, {foreignKey:'idUsuario'});
 modeloUsuarios.hasMany(mensajeMD, { foreignKey: "idUsuario" });

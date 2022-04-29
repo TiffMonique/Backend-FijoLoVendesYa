@@ -251,19 +251,35 @@ const todasVentas = async (req, res) => {
 
 const buscarVenta = async (req, res) => {
   const idVenta = req.params.idVenta;
+  var idUsuario = "";
+  if(req.session) {
+    idUsuario = req.session.user;
+  }
+  console.log(idUsuario);
   try {
     const venta = await ventasMD.findOne({
+      include: [modeloUsuarios],
       where: { idVenta: idVenta },
     });
     const fotos = await modeloFotosVentas.findAll({
       where: { idVenta: idVenta }, order: [['indice', 'ASC']]
     });
     var nombresfotos = []
+    var calificacion = {};
+    if (idUsuario) {
+      calificacion = await calificacionesMD.findOne({
+        where: {idUsuario, idVenta}
+      });
+    }
+    var ventacalificacion = venta.dataValues;
+    if(calificacion){
+      ventacalificacion = {...ventacalificacion, calificacion: calificacion.calificacion}
+    }
     if (fotos.length>0) {
       nombresfotos = fotos.map(foto => foto.nombre);
-      res.json({...venta.dataValues, fotos: nombresfotos});
+      res.json({...ventacalificacion, fotos: nombresfotos});
     }else {
-      res.json(venta.dataValues);
+      res.json(ventacalificacion);
     }
   } catch (error) {
     res.json({ message: error.message });
