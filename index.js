@@ -7,15 +7,15 @@ const cors = require("cors");
 const db = require("./database/db.js");
 const cookieParser = require("cookie-parser");
 const session_express = require("express-session");
-const pdf=require("./controller/crearpdf.js");
-var MySQLStore = require('express-mysql-session')(session_express);
-var sharedsesssion = require('express-socket.io-session');
+const pdf = require("./controller/crearpdf.js");
+var MySQLStore = require("express-mysql-session")(session_express);
+var sharedsesssion = require("express-socket.io-session");
 var options = {
-  host: 'localhost',
+  host: "localhost",
   port: 3306,
-  user: 'root',
-  password: 'password',
-  database: 'tienda'
+  user: "root",
+  password: "password",
+  database: "tienda",
 };
 var sessionStore = new MySQLStore(options);
 const session = session_express({
@@ -23,8 +23,8 @@ const session = session_express({
   secret: "secreto",
   resave: false,
   saveUninitialized: false,
-  store:sessionStore,
-  autoSave: true
+  store: sessionStore,
+  autoSave: true,
 });
 //configuracion
 // configurando el puerto
@@ -36,7 +36,7 @@ var corsOptions = {
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Credentials", true);
-  res.header('Access-Control-Allow-Origin', "http://localhost:3000");
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
   res.header(
     "Access-Control-Allow-Methods",
     "GET,PUT,POST,DELETE,UPDATE,OPTIONS"
@@ -53,9 +53,7 @@ app.use(cors(corsOptions));
 
 // middlewares
 
-app.use(
-  session
-);
+app.use(session);
 app.use(cookieParser());
 // hace log de cada petición
 app.use(morgan("tiny"));
@@ -74,7 +72,6 @@ try {
 }
 //enrutadores
 const CRT = require("./routes/RTCategorias.js");
-const pdf=require("./controller/crearpdf.js");
 
 //Rutas
 app.use("/api/tienda", require("./routes/RTregistro.js"));
@@ -86,30 +83,30 @@ app.use("/api/tienda", require("./routes/RTroles.js"));
 app.use("/api/tienda", require("./routes/RTusuarios.js"));
 app.use("/api/tienda", require("./routes/RTrestaurarpass.js"));
 app.use("/api/tienda", require("./routes/RTdenuncias.js"));
-app.use('/api/tienda', require('./routes/RTsuscripciones.js'));
-app.use('/api/tienda', require('./routes/RTFotos.js'));
-app.use('/api/tienda', require('./routes/RTestadisticas.js'));
+app.use("/api/tienda", require("./routes/RTsuscripciones.js"));
+app.use("/api/tienda", require("./routes/RTFotos.js"));
+app.use("/api/tienda", require("./routes/RTestadisticas.js"));
 //app.use('/api/tienda', require('./routes/routesCategorias.js'));
 //app.use('/api/tienda', require('./routes/routesUsuarios.js'));
 // Estáticos
 //no es necesario
 app.use("/api/tienda", require("./routes/RTanuncios.js"));
 app.use("/api/tienda", require("./routes/RTchat.js"));
-app.use('/api/tienda', require('./routes/RTfavoritos.js'));
+app.use("/api/tienda", require("./routes/RTfavoritos.js"));
 
 // Iniciar servidor
-const server = require('http').createServer(app);
-const io = require('socket.io')(server, {
+const server = require("http").createServer(app);
+const io = require("socket.io")(server, {
   cors: {
     origin: "http://localhost:3000",
     methods: ["GET", "POST", "OPTIONS"],
-    credentials: true
-  }
+    credentials: true,
+  },
 });
-io.use(sharedsesssion(session, {autoSave:true}));
+io.use(sharedsesssion(session, { autoSave: true }));
 
-module.exports.io=io;
-require('./sockets/socket');
+module.exports.io = io;
+require("./sockets/socket");
 server.listen(app.get("port"), () => {
   console.log(`server on port ${app.get("port")}`);
 });
