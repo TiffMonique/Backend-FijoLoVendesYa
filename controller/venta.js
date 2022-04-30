@@ -7,6 +7,11 @@ const modeloFotosVentas = require("../models/fotosVentas");
 const calificacionesMD = require("../models/CalificacionesMD");
 const { subirVarias } = require('../multerfotos/multerfoto');
 const { query } = require("express");
+//const PDF = require('pdfkit');
+const PDF = require("pdfkit-construct");  
+const fs = require('fs');
+const { options } = require("pdfkit");
+
 
 const crearVenta = async (req, res) => {
   subirVarias(req, res, true, 10, async (req, res) => {
@@ -206,18 +211,6 @@ const listarVentas = async (req, res) => {
   } catch (error) {
     res.json({ message: error.message });
   }
-  /*const consulta = 'Select * from Venta inner join DetalleVenta on Venta.idVenta = DetalleVenta.idVenta where Venta.idUsuario = ?';
-    console.log(req.body);
-    await pool.query(consulta, [idUsuario], (err, result) =>{
-        if(err){
-            res.status(500).send(err);
-        }else{
-            res.status(200).json({
-                message: `Lisa de Ventas del usuario`,
-                Ventas: result
-            })
-        }
-    })*/
 };
 
 const todasVentas = async (req, res) => {
@@ -431,6 +424,7 @@ const ultimasVentas = async (req, res) => {
   }
 };
 
+
 module.exports = {
   crearVenta,
   eliminarVenta,
@@ -443,3 +437,5 @@ module.exports = {
   busqueda,
   ultimasVentas
 };
+
+

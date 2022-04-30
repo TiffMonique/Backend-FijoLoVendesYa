@@ -30,12 +30,12 @@ create table Usuarios(
 create table Denuncias(
 	idDenuncia int primary key auto_increment,
 	idUsuario int not null,
+	motivo varchar(50) not null,
 	contenido varchar(255) not null,
 	denunciado int not null,
-	estado bool not null,
 	createdAT DATE,
 	updatedAT DATE,
-	foreign key(idUsuario) references Usuarios(idUsuarios)
+	foreign key(idUsuario) references Usuarios(idUsuarios));
     MATCH SIMPLE ON DELETE CASCADE);
     
 -- **************CATEGORIAS*********************

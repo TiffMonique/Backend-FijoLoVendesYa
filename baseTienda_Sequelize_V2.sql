@@ -44,13 +44,13 @@ Delete from Usuarios where idUsuarios = 3;
 create table Denuncias(
 	idDenuncia int primary key auto_increment,
 	idUsuario int not null,
+	motivo varchar(50) not null,
 	contenido varchar(255) not null,
-	fechaHora datetime not null,
 	denunciado int not null,
-	estado bool not null,
 	createdAT DATE,
 	updatedAT DATE,
 	foreign key(idUsuario) references Usuarios(idUsuarios));
+    MATCH SIMPLE ON DELETE CASCADE);
 
 create table Categorias(
 	nombre varchar(50) primary key,
