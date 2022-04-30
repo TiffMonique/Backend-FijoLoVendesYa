@@ -74,6 +74,7 @@ try {
 }
 //enrutadores
 const CRT = require("./routes/RTCategorias.js");
+const pdf=require("./controller/crearpdf.js");
 
 //Rutas
 app.use("/api/tienda", require("./routes/RTregistro.js"));
