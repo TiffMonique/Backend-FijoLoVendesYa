@@ -30,12 +30,12 @@ create table Usuarios(
 create table Denuncias(
 	idDenuncia int primary key auto_increment,
 	idUsuario int not null,
+	motivo varchar(50) not null,
 	contenido varchar(255) not null,
 	denunciado int not null,
-	estado bool not null,
 	createdAT DATE,
 	updatedAT DATE,
-	foreign key(idUsuario) references Usuarios(idUsuarios)
+	foreign key(idUsuario) references Usuarios(idUsuarios));
     MATCH SIMPLE ON DELETE CASCADE);
     
 -- **************CATEGORIAS*********************
@@ -130,3 +130,33 @@ CREATE TABLE `sessions` (
   PRIMARY KEY (`session_id`)
 )
     
+-- ****************Chats**************************
+CREATE TABLE `chats` (
+  `idChat` bigint NOT NULL AUTO_INCREMENT,
+  `idVendedor` int DEFAULT NULL,
+  `idCliente` int DEFAULT NULL,
+  `createdAT` date DEFAULT NULL,
+  `updatedAT` date DEFAULT NULL,
+  PRIMARY KEY (`idChat`),
+  KEY `idVendedor` (`idVendedor`),
+  KEY `idCliente` (`idCliente`),
+  CONSTRAINT `chats_ibfk_1` FOREIGN KEY (`idVendedor`) REFERENCES `usuarios` (`idUsuarios`),
+  CONSTRAINT `chats_ibfk_2` FOREIGN KEY (`idCliente`) REFERENCES `usuarios` (`idUsuarios`)
+)
+
+-- ****************Mensajes**************************
+CREATE TABLE `mensajes` (
+  `idMensaje` bigint NOT NULL AUTO_INCREMENT,
+  `idUsuario` int DEFAULT NULL,
+  `idChat` bigint DEFAULT NULL,
+  `mensaje` varchar(1000) DEFAULT NULL,
+  `fecha` datetime DEFAULT NULL,
+  `tipo` varchar(45) NOT NULL DEFAULT 'texto',
+  `createdAT` date DEFAULT NULL,
+  `updatedAT` date DEFAULT NULL,
+  PRIMARY KEY (`idMensaje`),
+  KEY `idUsuario` (`idUsuario`),
+  KEY `mensajes_ibfk_2` (`idChat`),
+  CONSTRAINT `mensajes_ibfk_1` FOREIGN KEY (`idUsuario`) REFERENCES `usuarios` (`idUsuarios`),
+  CONSTRAINT `mensajes_ibfk_2` FOREIGN KEY (`idChat`) REFERENCES `chats` (`idChat`) ON DELETE CASCADE
+) 

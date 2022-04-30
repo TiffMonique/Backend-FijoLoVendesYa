@@ -5,26 +5,21 @@ const modeloCategorias = require("../models/CategoriasMD.js");
 const modeloUsuarios = require("../models/UsuariosMD.js");
 const modeloFotosVentas = require("../models/fotosVentas");
 const calificacionesMD = require("../models/CalificacionesMD");
-const { subirVarias } = require("../multerfotos/multerfoto");
+const { subirVarias } = require('../multerfotos/multerfoto');
 const { query } = require("express");
 
 const crearVenta = async (req, res) => {
   subirVarias(req, res, true, 10, async (req, res) => {
-    const { estado, categoria, producto, cantidad, descripcion, precio } =
-      req.body;
+    const { estado, categoria, producto, cantidad, descripcion, precio } = req.body;
     console.log(req.body);
     const idUsuario = req.session.user;
     let now = new Date();
     const fechaPublicacion = now.getTime();
-    const venta = { ...req.body, idUsuario, fechaPublicacion };
+    const venta = {...req.body, idUsuario, fechaPublicacion,};
     try {
       const respuesta = await ventasMD.create(venta);
       const fotos = req.files.map((foto, posicion) => {
-        return {
-          nombre: foto.filename,
-          idVenta: respuesta.idVenta,
-          indice: posicion,
-        };
+        return { nombre: foto.filename, idVenta: respuesta.idVenta, indice: posicion};
       });
       //console.log("req.files: " + req.files);
       //console.log("Arreglo de fotos: " + fotos);
@@ -36,7 +31,7 @@ const crearVenta = async (req, res) => {
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
-  });
+  })
 };
 // Inserta una venta con todo y su detalle
 // estado es bool, categoría es int, debe existir la categoría
@@ -192,33 +187,21 @@ const listarVentas = async (req, res) => {
     // buscando la primera foto de cada venta
     for (let index = 0; index < ventas.length; index++) {
       const venta = ventas[index];
-      const foto = await modeloFotosVentas.findOne({
-        where: { idVenta: venta.idVenta },
-        order: [["indice", "ASC"]],
-      });
+      const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
       var ventafoto;
       const calificacionPromedio = await calificacionesMD.findOne({
-        attributes: [
-          [Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"],
-        ],
-        where: { idVenta: venta.idVenta },
-      });
+        attributes: [[Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"]],
+        where: {idVenta:venta.idVenta}
+      })
       var ventafoto;
-      if (foto) {
-        ventafoto = {
-          ...venta.dataValues,
-          foto: foto.dataValues.nombre,
-          calificacion: calificacionPromedio.dataValues.promedio,
-        };
+      if(foto) {
+        ventafoto = {...venta.dataValues, foto: foto.dataValues.nombre, calificacion: calificacionPromedio.dataValues.promedio}
       } else {
-        ventafoto = {
-          ...venta.dataValues,
-          calificacion: calificacionPromedio.dataValues.promedio,
-        };
+        ventafoto = {...venta.dataValues, calificacion: calificacionPromedio.dataValues.promedio}
       }
       ventasfoto.push(ventafoto);
     }
-    console.log("fotos despues de foreach", fotos);
+    console.log("fotos despues de foreach" , fotos)
     res.json(ventasfoto);
   } catch (error) {
     res.json({ message: error.message });
@@ -241,38 +224,25 @@ const todasVentas = async (req, res) => {
   try {
     const ventas = await ventasMD.findAll({
       include: [modeloUsuarios, modeloCategorias],
-    });
-    var fotos = [];
+    });var fotos = [];
     var ventasfoto = [];
     // buscando la primera foto de cada venta
     for (let index = 0; index < ventas.length; index++) {
       const venta = ventas[index];
-      const foto = await modeloFotosVentas.findOne({
-        where: { idVenta: venta.idVenta },
-        order: [["indice", "ASC"]],
-      });
+      const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
       const calificacionPromedio = await calificacionesMD.findOne({
-        attributes: [
-          [Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"],
-        ],
-        where: { idVenta: venta.idVenta },
-      });
+        attributes: [[Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"]],
+        where: {idVenta:venta.idVenta}
+      })
       var ventafoto;
-      if (foto) {
-        ventafoto = {
-          ...venta.dataValues,
-          foto: foto.dataValues.nombre,
-          calificacion: calificacionPromedio.dataValues.promedio,
-        };
+      if(foto) {
+        ventafoto = {...venta.dataValues, foto: foto.dataValues.nombre, calificacion: calificacionPromedio.dataValues.promedio}
       } else {
-        ventafoto = {
-          ...venta.dataValues,
-          calificacion: calificacionPromedio.dataValues.promedio,
-        };
+        ventafoto = {...venta.dataValues, calificacion: calificacionPromedio.dataValues.promedio}
       }
       ventasfoto.push(ventafoto);
     }
-    console.log("fotos despues de foreach", fotos);
+    console.log("fotos despues de foreach" , fotos)
     res.json(ventasfoto);
   } catch (error) {
     res.json({ message: error.message });
@@ -281,32 +251,46 @@ const todasVentas = async (req, res) => {
 
 const buscarVenta = async (req, res) => {
   const idVenta = req.params.idVenta;
+  var idUsuario = "";
+  if(req.session) {
+    idUsuario = req.session.user;
+  }
+  console.log(idUsuario);
   try {
     const venta = await ventasMD.findOne({
+      include: [modeloUsuarios],
       where: { idVenta: idVenta },
     });
     const fotos = await modeloFotosVentas.findAll({
-      where: { idVenta: idVenta },
-      order: [["indice", "ASC"]],
+      where: { idVenta: idVenta }, order: [['indice', 'ASC']]
     });
-    var nombresfotos = [];
-    if (fotos.length > 0) {
-      nombresfotos = fotos.map((foto) => foto.nombre);
-      res.json({ ...venta.dataValues, fotos: nombresfotos });
-    } else {
-      res.json(venta.dataValues);
+    var nombresfotos = []
+    var calificacion = {};
+    if (idUsuario) {
+      calificacion = await calificacionesMD.findOne({
+        where: {idUsuario, idVenta}
+      });
+    }
+    var ventacalificacion = venta.dataValues;
+    if(calificacion){
+      ventacalificacion = {...ventacalificacion, calificacion: calificacion.calificacion}
+    }
+    if (fotos.length>0) {
+      nombresfotos = fotos.map(foto => foto.nombre);
+      res.json({...ventacalificacion, fotos: nombresfotos});
+    }else {
+      res.json(ventacalificacion);
     }
   } catch (error) {
     res.json({ message: error.message });
   }
-};
+}; 
 
 const fotosVenta = async (req, res) => {
   const idVenta = req.params.idVenta;
   try {
     const fotos = await modeloFotosVentas.findAll({
-      where: { idVenta: idVenta },
-      order: [["indice", "ASC"]],
+      where: { idVenta: idVenta }, order: [['indice', 'ASC']]
     });
     res.status(200).json(fotos);
   } catch (err) {
@@ -319,13 +303,13 @@ const unaFoto = async (req, res) => {
   const indice = req.params.indice;
   try {
     const foto = await modeloFotosVentas.findOne({
-      where: { idVenta: idVenta, indice: indice },
+      where: { idVenta: idVenta, indice:indice },
     });
     if (foto) {
-      const nombrefoto = foto.nombre;
-      res.status(200).json(nombrefoto);
-    } else {
-      res.status(404).json({ message: "No se encuentra esa foto" });
+      const nombrefoto = foto.nombre
+      res.status(200).json(nombrefoto)
+    }else {
+      res.status(404).json({message: "No se encuentra esa foto"});
     }
   } catch (err) {
     res.status(400).json(err.message);
@@ -339,13 +323,13 @@ const busqueda = (req, res) => {
   var busquedaOrder = "";
   var categoriaQuery = "";
   var departamentoQuery = "";
-  var precioQuery = "";
+  var precioQuery="";
   if (req.query.busqueda) {
-    const separado = req.query.busqueda.split(" ").filter(Boolean);
+    const separado = req.query.busqueda.split(' ').filter(Boolean);
     separado.forEach((palabra, indice) => {
-      interno = indice == 0 ? palabra : interno + "|" + palabra;
+      interno= indice==0 ?palabra:interno+'|'+palabra;
     });
-    const expresion = interno;
+    const expresion =  interno;
     busquedaCase = `
     ,(CASE WHEN producto like "%${req.query.busqueda}%" THEN 1 ELSE 0 END +
       CASE WHEN venta.descripcion like "%${req.query.busqueda}%" THEN 1 ELSE 0 END +
@@ -360,156 +344,90 @@ const busqueda = (req, res) => {
         venta.descripcion regexp "${expresion}"
       )
     `;
-
-    busquedaOrder = " ordenar desc";
-  }
+    busquedaOrder=' ordenar desc';
+  } 
   if (req.query.categoria) {
-    categoriaQuery = ` and venta.categoria = '${req.query.categoria}'`;
+    categoriaQuery= ` and venta.categoria = '${req.query.categoria}'`;
   }
   if (req.query.departamento) {
-    departamentoQuery = ` and usuarios.departamento = '${req.query.departamento}'`;
+    departamentoQuery= ` and usuarios.departamento = '${req.query.departamento}'`;
   }
   if (req.query.precioMin && req.query.precioMax) {
-    precioQuery = ` and (venta.precio between ${req.query.precioMin} and ${req.query.precioMax})`;
-  } else if (req.query.precioMin) {
-    precioQuery = ` and (venta.precio > ${req.query.precioMin})`;
-  } else if (req.query.precioMax) {
-    precioQuery = ` and (venta.precio < ${req.query.precioMax})`;
+    precioQuery= ` and (venta.precio between ${req.query.precioMin} and ${req.query.precioMax})`;
+  } else if(req.query.precioMin) {
+    precioQuery= ` and (venta.precio > ${req.query.precioMin})`;
+  } else if (req.query.precioMax){
+    precioQuery= ` and (venta.precio < ${req.query.precioMax})`;
   }
-
-  consulta =
-    "select * " +
-    busquedaCase +
-    " from usuarios, venta " +
-    "where (usuarios.idusuarios = venta.idusuario)" +
-    busquedaCondicion +
-    categoriaQuery +
-    departamentoQuery +
-    precioQuery +
-    " order by" +
-    (busquedaOrder ? busquedaOrder + "," : "") +
-    " fechaPublicacion desc";
-
-  console.log(consulta);
+  consulta = 'select * '+busquedaCase+' from usuarios, venta '+
+  'where (usuarios.idusuarios = venta.idusuario)'+
+  busquedaCondicion+
+  categoriaQuery+
+  departamentoQuery+
+  precioQuery+
+  ' order by'+((busquedaOrder)?busquedaOrder+",":"")+
+  ' fechaPublicacion desc';
   try {
-    pool
-      .query(consulta)
-      .then(async (ventas) => {
-        var ventasfoto = [];
-        if (ventas.length > 0) {
-          for (let index = 0; index < ventas.length; index++) {
-            const venta = ventas[index];
-            const foto = await modeloFotosVentas.findOne({
-              where: { idVenta: venta.idVenta },
-              order: [["indice", "ASC"]],
-            });
-            const calificacionPromedio = await calificacionesMD.findOne({
-              attributes: [
-                [
-                  Sequelize.fn("AVG", Sequelize.col("calificacion")),
-                  "promedio",
-                ],
-              ],
-              where: { idVenta: venta.idVenta },
-            });
-            var ventafoto;
-            if (foto) {
-              ventafoto = {
-                ...venta,
-                foto: foto.dataValues.nombre,
-                calificacion: calificacionPromedio.dataValues.promedio,
-              };
-            } else {
-              ventafoto = {
-                ...venta,
-                calificacion: calificacionPromedio.dataValues.promedio,
-              };
-            }
-            ventasfoto.push(ventafoto);
+    pool.query(consulta)
+    .then(async (ventas) => {
+      var ventasfoto = [];
+      if(ventas.length>0) {
+        for (let index = 0; index < ventas.length; index++) {
+          const venta = ventas[index];
+          const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
+          const calificacionPromedio = await calificacionesMD.findOne({
+            attributes: [[Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"]],
+            where: {idVenta:venta.idVenta}
+          })
+          var ventafoto;
+          if(foto) {
+            ventafoto = {...venta, foto: foto.dataValues.nombre, calificacion: calificacionPromedio.dataValues.promedio}
+          } else {
+            ventafoto = {...venta, calificacion: calificacionPromedio.dataValues.promedio}
           }
-          res.status(200).json(ventasfoto);
-        } else {
-          res
-            .status(400)
-            .json({ message: "No se ha encontrado ninguna venta" });
+          ventasfoto.push(ventafoto);
         }
-      })
-      .catch((err) => {
-        res.status(500).send(err);
-      });
+        res.status(200).json(ventasfoto);
+      } else {
+        res.status(400).json({message: "No se ha encontrado ninguna venta"})
+      }
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    })
   } catch (err) {
-    res.status(500).json({ message: "Eror inesperado", error: err.message });
+    res.status(500).json({message: "Eror inesperado", error: err.message})
   }
-};
+}
 
-const busqueda2 = async (req, res) => {
-  var ventas;
-  if (req.query.busqueda) {
-    const separado = req.query.busqueda.split(" ").filter(Boolean);
-    separado.forEach((palabra, indice) => {
-      interno = indice == 0 ? palabra : interno + "|" + palabra;
-    });
-    const expresion = interno;
-    console.log(expresion);
-
-    ventas = pool.query();
-    ventas = await ventasMD.findAll({
-      attributes: {
-        include: [
-          [
-            Sequelize.literal(`
-      CASE WHEN producto like "%${req.query.busqueda}%" THEN 1 ELSE 0 END +
-      CASE WHEN descripcion like "%${req.query.busqueda}%" THEN 1 ELSE 0 END +
-      CASE WHEN producto regexp "${expresion}" THEN 1 ELSE 0 END + 
-      CASE WHEN descripcion regexp "%${expresion}%" THEN 1 ELSE 0 END`),
-            "parecido",
-          ],
-        ],
-      },
-      where: {
-        [Op.or]: [
-          { producto: { [Op.substring]: req.query.busqueda } },
-          { producto: { [Op.or]: { [Op.regexp]: expresion } } },
-          { descripcion: { [Op.or]: { [Op.regexp]: expresion } } },
-          { descripcion: { [Op.substring]: req.query.busqueda } },
-        ],
-      },
-      order: [[Sequelize.literal("parecido"), "DESC"]],
-    });
-  }
-  var ventasfoto = [];
-  // buscando la primera foto de cada venta
-  if (ventas) {
+const ultimasVentas = async (req, res) => {
+  try {
+    const ventas = await ventasMD.findAll({
+      include: [modeloUsuarios, modeloCategorias],
+      limit: 9,
+      order: [['idVenta', 'DESC']]
+    });var fotos = [];
+    var ventasfoto = [];
+    // buscando la primera foto de cada venta
     for (let index = 0; index < ventas.length; index++) {
       const venta = ventas[index];
-      const foto = await modeloFotosVentas.findOne({
-        where: { idVenta: venta.idVenta },
-        order: [["indice", "ASC"]],
-      });
+      const foto = await modeloFotosVentas.findOne({where: {idVenta:venta.idVenta}, order: [['indice', 'ASC']]})
       const calificacionPromedio = await calificacionesMD.findOne({
-        attributes: [
-          [Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"],
-        ],
-        where: { idVenta: venta.idVenta },
-      });
+        attributes: [[Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"]],
+        where: {idVenta:venta.idVenta}
+      })
       var ventafoto;
-      if (foto) {
-        ventafoto = {
-          ...venta.dataValues,
-          foto: foto.dataValues.nombre,
-          calificacion: calificacionPromedio.dataValues.promedio,
-        };
+      if(foto) {
+        ventafoto = {...venta.dataValues, foto: foto.dataValues.nombre, calificacion: calificacionPromedio.dataValues.promedio}
       } else {
-        ventafoto = {
-          ...venta.dataValues,
-          calificacion: calificacionPromedio.dataValues.promedio,
-        };
+        ventafoto = {...venta.dataValues, calificacion: calificacionPromedio.dataValues.promedio}
       }
       ventasfoto.push(ventafoto);
     }
-    res.status(200).json(ventasfoto);
-  } else {
-    res.status(400).json({ message: "No se ha encontrado ninguna venta" });
+    console.log("fotos despues de foreach" , fotos)
+    res.json(ventasfoto);
+  } catch (error) {
+    res.json({ message: error.message });
   }
 };
 
@@ -523,4 +441,5 @@ module.exports = {
   fotosVenta,
   unaFoto,
   busqueda,
+  ultimasVentas
 };
