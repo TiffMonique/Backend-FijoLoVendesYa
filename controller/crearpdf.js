@@ -13,7 +13,7 @@ const { type } = require("os");
 
 
 //funcion que crea el pdf cada minuto y lo envía 
-var enviar= new CronJob('* * * * *', async function() {
+var enviar= new CronJob('5 8 * * 6', async function() {
 
   try{
 

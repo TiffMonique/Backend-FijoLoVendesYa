@@ -22,9 +22,10 @@ const calificar = async (req, res) => {
         await calificacionesMD.create(calificacionInsert);
         res.status(200).json({ message: "Calificación Guardada" });
       } else {
-        res.status(401).json({
-          message: "No puede calificar más de una vez la misma venta",
-        });
+        await calificacionesMD.update(calificacionInsert, {
+          where: {idCalificacion:calificacion.dataValues.idCalificacion}
+        })
+        res.status(200).json({ message: "Calificación Guardada" });
       }
     }
   } catch (error) {

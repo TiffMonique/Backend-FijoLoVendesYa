@@ -2,7 +2,7 @@ const db = require("../database/db.js");
 const ventasMD = require("./VentasMD.js");
 const { DataTypes } = require("sequelize");
 const anunciosMD = db.define('Anuncios', {
-    idAnncio: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true},
+    idAnuncio: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true},
     idVenta: { type: DataTypes.INTEGER, foreignKey: true},
     fechaInicio: { type:DataTypes.DATE},
     fechaFin: { type:DataTypes.DATE},
