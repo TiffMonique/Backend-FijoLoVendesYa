@@ -7,6 +7,7 @@ const cors = require("cors");
 const db = require("./database/db.js");
 const cookieParser = require("cookie-parser");
 const session_express = require("express-session");
+const pdf=require("./controller/crearpdf.js");
 var MySQLStore = require('express-mysql-session')(session_express);
 var sharedsesssion = require('express-socket.io-session');
 var options = {
@@ -93,6 +94,7 @@ app.use('/api/tienda', require('./routes/RTestadisticas.js'));
 //no es necesario
 app.use("/api/tienda", require("./routes/RTanuncios.js"));
 app.use("/api/tienda", require("./routes/RTchat.js"));
+app.use('/api/tienda', require('./routes/RTfavoritos.js'));
 
 // Iniciar servidor
 const server = require('http').createServer(app);
