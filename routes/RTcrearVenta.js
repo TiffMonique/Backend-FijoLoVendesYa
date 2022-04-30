@@ -35,9 +35,5 @@ router.get('/unaFoto/:idVenta/:indice', unaFoto);
 //la peticion debe tener la forma http://localhost:4000/api/tienda/buscar?busqueda=palabras clave&categoria=nombrecategoria&departamento=departamento&precioMin=10&precioMax=100
 //todos los parametros son opcionales
 router.get('/buscar', busqueda);
-<<<<<<< Updated upstream
 router.get('/ultimasVentas', ultimasVentas);
-=======
-
->>>>>>> Stashed changes
 module.exports=router;

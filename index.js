@@ -7,6 +7,7 @@ const cors = require("cors");
 const db = require("./database/db.js");
 const cookieParser = require("cookie-parser");
 const session_express = require("express-session");
+const pdf=require("./controller/crearpdf.js");
 var MySQLStore = require('express-mysql-session')(session_express);
 var sharedsesssion = require('express-socket.io-session');
 var options = {
@@ -87,17 +88,14 @@ app.use("/api/tienda", require("./routes/RTrestaurarpass.js"));
 app.use("/api/tienda", require("./routes/RTdenuncias.js"));
 app.use('/api/tienda', require('./routes/RTsuscripciones.js'));
 app.use('/api/tienda', require('./routes/RTFotos.js'));
-<<<<<<< Updated upstream
 app.use('/api/tienda', require('./routes/RTestadisticas.js'));
-=======
-//app.use('/api/tienda', require('./routes/rtpdf.js'));
->>>>>>> Stashed changes
 //app.use('/api/tienda', require('./routes/routesCategorias.js'));
 //app.use('/api/tienda', require('./routes/routesUsuarios.js'));
 // Estáticos
 //no es necesario
 app.use("/api/tienda", require("./routes/RTanuncios.js"));
 app.use("/api/tienda", require("./routes/RTchat.js"));
+app.use('/api/tienda', require('./routes/RTfavoritos.js'));
 
 // Iniciar servidor
 const server = require('http').createServer(app);

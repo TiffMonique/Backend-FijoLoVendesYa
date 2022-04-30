@@ -26,7 +26,7 @@ const unFavorito = async (req, res) => {
 };
 
 //3. INSERTAR UN FAVORITO
-const insertarFavorito= (req, res) => {
+const insertarFavorito= async (req, res) => {
     const idVenta=req.params.body;
     const idUsuario = req.session.user;
     const favorito={idUsuario,idVenta};
