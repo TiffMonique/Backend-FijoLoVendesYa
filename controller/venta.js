@@ -5,6 +5,7 @@ const modeloCategorias = require("../models/CategoriasMD.js");
 const modeloUsuarios = require("../models/UsuariosMD.js");
 const modeloFotosVentas = require("../models/fotosVentas");
 const calificacionesMD = require("../models/CalificacionesMD");
+const anunciosMD = require('../models/anunciosMD')
 const { subirVarias } = require('../multerfotos/multerfoto');
 const { query } = require("express");
 
@@ -199,7 +200,14 @@ const listarVentas = async (req, res) => {
       } else {
         ventafoto = {...venta.dataValues, calificacion: calificacionPromedio.dataValues.promedio}
       }
-      ventasfoto.push(ventafoto);
+      var anuncio = await anunciosMD.findOne({
+        where: {idVenta:venta.idVenta}
+      })
+      if(anuncio) {
+        ventasfoto.push({...ventafoto, anuncio: anuncio.dataValues});
+      } else {
+        ventasfoto.push(ventafoto);
+      }
     }
     console.log("fotos despues de foreach" , fotos)
     res.json(ventasfoto);
