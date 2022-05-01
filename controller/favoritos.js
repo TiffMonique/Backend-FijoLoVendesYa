@@ -1,13 +1,38 @@
 //IMPORTAMOS EL MODELO
 const db = require("../database/db.js");
+const { Sequelize} = require("sequelize");
 const modeloFavoritos = require("../models/FavoritosMD.js");
+const ventasMD = require("../models/VentasMD.js");
+const modeloFotosVentas = require("../models/fotosVentas");
+const calificacionesMD = require("../models/CalificacionesMD");
 
 //------------METODOS PARA EL CRUD-----------
 //1. OBTENER TODOS LOS FAVORITOS
 const obtenerFavoritos = async (req, res) => {
+  const idUsuario=req.session.user;
   try {
-    const favoritos = await modeloFavoritos.findAll();
-    res.json(favoritos);
+    const favoritos = await modeloFavoritos.findAll({
+      include:[ventasMD],
+      where:{idUsuario:idUsuario},
+    });
+    var favoritosfoto = [];
+    // buscando la primera foto de cada favorito(venta)
+    for (let index = 0; index < favoritos.length; index++) {
+      const favorito = favoritos[index];
+      const foto = await modeloFotosVentas.findOne({where: {idVenta:favorito.idVenta}, order: [['indice', 'ASC']]})
+      const calificacionPromedio = await calificacionesMD.findOne({
+        attributes: [[Sequelize.fn("AVG", Sequelize.col("calificacion")), "promedio"]],
+        where: {idVenta:favorito.idVenta}
+      })
+      var favoritofoto;
+      if(foto) {
+        favoritofoto = {...favorito.Ventum.dataValues, foto: foto.dataValues.nombre, calificacion: calificacionPromedio.dataValues.promedio,idLista:favorito.idLista}
+      } else {
+        favoritofoto = {...favorito.Ventum.dataValues, calificacion: calificacionPromedio.dataValues.promedio,idLista:favorito.idLista}
+      }
+      favoritosfoto.push(favoritofoto);
+    }
+    res.json(favoritosfoto);
   } catch (error) {
     res.json({ message: error.message });
   }
@@ -27,8 +52,9 @@ const unFavorito = async (req, res) => {
 
 //3. INSERTAR UN FAVORITO
 const insertarFavorito= async (req, res) => {
-    const idVenta=req.params.body;
     const idUsuario = req.session.user;
+    console.log(idUsuario);
+    const idVenta = req.params.idVenta;
     const favorito={idUsuario,idVenta};
     try {
       await modeloFavoritos.create(favorito);
