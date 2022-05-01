@@ -5,6 +5,7 @@ const chatMD = db.define("chats", {
   idChat: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
   idVendedor: { type: DataTypes.INTEGER, foreignKey: true },
   idCliente: { type: DataTypes.INTEGER, foreignKey: true },
+  sinleer: { type: DataTypes.BOOLEAN}
 });
 chatMD.belongsTo(modeloUsuarios, {foreignKey:'idVendedor'});
 modeloUsuarios.hasMany(chatMD, { foreignKey: "idVendedor" });

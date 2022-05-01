@@ -59,6 +59,10 @@ const guardarMensaje = async (msg, socket, io) =>{
     var mensaje = {}
     if (msg.tipo == "texto") {
       mensaje = {...msg, idUsuario, fecha};
+      var chat =await modeloChat.findOne({where:{idChat:mensaje.idChat}})
+      var chatupdate = chat.dataValues;
+      chatupdate.sinleer = true;
+      await modeloChat.update(chatupdate, {where:{idChat:chat.idChat}})
     } else if (msg.tipo == "venta") {
       const idVenta = msg.idVenta;
       const idContacto = msg.idContacto;
@@ -91,10 +95,19 @@ const guardarMensaje = async (msg, socket, io) =>{
             sockett.join(chat.idChat);
           }
         });
+
+        // estableciendo no leido
+        chat.sinleer = true;
+        await modeloChat.update(chat, {where:{idChat:chat.idChat}})
+
         const chatV = {...chat, nombreContacto: miusuario.nombre, apellidoContacto: miusuario.apellido}
         socket.to(chat.idChat).emit('nuevochat', chatV);
         const chatU = {...chat, nombreContacto: contacto.nombre, apellidoContacto: contacto.apellido}
         socket.emit('nuevochat', chatU);
+      } else {
+        // estableciendo no leido
+        chat.sinleer = true;
+        await modeloChat.update(chat, {where:{idChat:chat.idChat}})
       }
       const venta = await modeloVenta.findOne({
         where: {idVenta}
@@ -119,8 +132,24 @@ const guardarMensaje = async (msg, socket, io) =>{
   }
 }
 
+const confirmarLectura = async(idChat) => {
+  try {
+    const chat= await modeloChat.findOne({
+      where: {idChat:idChat}
+    })
+    if(chat) {
+      var chatupdate = chat.dataValues;
+      chatupdate.sinleer = false;
+      await modeloChat.update(chatupdate, {where: {idChat:idChat}})
+    }
+  }catch(err){
+    console.log(err.message);
+  }
+}
+
 module.exports = {
     validarConexion,
     misChats,
-    guardarMensaje
+    guardarMensaje,
+    confirmarLectura
 }
