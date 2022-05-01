@@ -7,14 +7,9 @@ const cors = require("cors");
 const db = require("./database/db.js");
 const cookieParser = require("cookie-parser");
 const session_express = require("express-session");
-<<<<<<< Updated upstream
 const pdf = require("./controller/crearpdf.js");
 var MySQLStore = require("express-mysql-session")(session_express);
 var sharedsesssion = require("express-socket.io-session");
-=======
-var MySQLStore = require('express-mysql-session')(session_express);
-var sharedsesssion = require('express-socket.io-session');
->>>>>>> Stashed changes
 var options = {
   host: "localhost",
   port: 3306,
