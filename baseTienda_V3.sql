@@ -135,6 +135,7 @@ CREATE TABLE `chats` (
   `idChat` bigint NOT NULL AUTO_INCREMENT,
   `idVendedor` int DEFAULT NULL,
   `idCliente` int DEFAULT NULL,
+  `sinleer` tinyint DEFAULT NULL,
   `createdAT` date DEFAULT NULL,
   `updatedAT` date DEFAULT NULL,
   PRIMARY KEY (`idChat`),
