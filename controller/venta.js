@@ -5,7 +5,8 @@ const modeloCategorias = require("../models/CategoriasMD.js");
 const modeloUsuarios = require("../models/UsuariosMD.js");
 const modeloFotosVentas = require("../models/fotosVentas");
 const calificacionesMD = require("../models/CalificacionesMD");
-const anunciosMD = require('../models/anunciosMD')
+const anunciosMD = require('../models/anunciosMD');
+const busquedasMD = require('../models/busquedasMD')
 const { subirVarias } = require('../multerfotos/multerfoto');
 const { query } = require("express");
 
@@ -324,7 +325,7 @@ const unaFoto = async (req, res) => {
   }
 };
 
-const busqueda = (req, res) => {
+const busqueda = async(req, res) => {
   var consulta = "";
   var busquedaCase = "";
   var busquedaCondicion = "";
@@ -375,6 +376,14 @@ const busqueda = (req, res) => {
   precioQuery+
   ' order by'+((busquedaOrder)?busquedaOrder+",":"")+
   ' fechaPublicacion desc';
+  try{
+    await busquedasMD.create({
+      categoria:req.query.categoria,
+      depto:req.query.departamento
+    })
+  }catch(err){
+    console.log(err.message);
+  }
   try {
     pool.query(consulta)
     .then(async (ventas) => {
