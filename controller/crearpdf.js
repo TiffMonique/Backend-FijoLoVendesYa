@@ -11,7 +11,7 @@ var CronJob = require("cron").CronJob;
 var http = require("http");
 const { type } = require("os");
 
-  async function () {
+
 
 //funcion que crea el pdf cada minuto y lo envía 
 var enviar= new CronJob('5 8 * * 6', async function() {

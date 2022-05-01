@@ -1,6 +1,6 @@
 
 const { io } = require('../index')
-const { validarConexion, misChats, guardarMensaje } = require('../controller/socketCT')
+const { validarConexion, misChats, guardarMensaje, confirmarLectura } = require('../controller/socketCT')
 
 var cuenta=0;
 io.on('connection', async(socket) => {
@@ -21,6 +21,10 @@ io.on('connection', async(socket) => {
         socket.to(msgg.idChat).emit("mensajenuevo", msgg);
         socket.emit("mensajenuevo", msgg);
       }
+    })
+    socket.on('confLectura', async ({idChat})=> {
+      console.log(idChat);
+      await confirmarLectura(idChat);
     })
     socket.on('prueba', (msg)=> {
       cuenta ++;

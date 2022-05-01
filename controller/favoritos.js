@@ -58,7 +58,7 @@ const insertarFavorito= async (req, res) => {
     const idVenta = req.params.idVenta;
     const favorito={idUsuario,idVenta};
     try {
-      const existe = await pool.query('select *from favoritos where idVenta=?',[idVenta]);
+      const existe = await pool.query('select *from favoritos where idVenta=? and idUsuario=?',[idVenta, idUsuario]);
       if(existe.length>0){
         console.log(existe);
         res.status(400).json({ message: "favorito ya está agregado"});
