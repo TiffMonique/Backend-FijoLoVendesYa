@@ -1,5 +1,6 @@
 //IMPORTAMOS EL MODELO
 const db = require("../database/db.js");
+const pool = require('../database/database'); // la conexión
 const { Sequelize} = require("sequelize");
 const modeloFavoritos = require("../models/FavoritosMD.js");
 const ventasMD = require("../models/VentasMD.js");
@@ -57,8 +58,14 @@ const insertarFavorito= async (req, res) => {
     const idVenta = req.params.idVenta;
     const favorito={idUsuario,idVenta};
     try {
-      await modeloFavoritos.create(favorito);
-      res.status(200).json({ message: "Favorito registrado" });
+      const existe = await pool.query('select *from favoritos where idVenta=?',[idVenta]);
+      if(existe.length>0){
+        console.log(existe);
+        res.status(400).json({ message: "favorito ya está agregado"});
+      }else{
+        await modeloFavoritos.create(favorito);
+        res.status(200).json({ message: "Favorito registrado" });
+      }
     } catch (error) {
       res.status(400).json({ message: "Ha ocurrido un error", error: error.message });
     }

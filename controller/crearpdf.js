@@ -11,16 +11,7 @@ var CronJob = require("cron").CronJob;
 var http = require("http");
 const { type } = require("os");
 
-<<<<<<< Updated upstream
-//funcion que crea el pdf cada minuto y lo envía
-var enviar = new CronJob(
-  "5 8 * * 6",
   async function () {
-    try {
-      var ussers = await modeloUsuarios.findAll({
-        include: modeloRoles,
-      });
-=======
 
 //funcion que crea el pdf cada minuto y lo envía 
 var enviar= new CronJob('5 8 * * 6', async function() {
@@ -28,7 +19,6 @@ var enviar= new CronJob('5 8 * * 6', async function() {
   try{
 
       var  ussers= await pool.query('SELECT * FROM usuarios WHERE EXISTS (SELECT * FROM suscripciones WHERE usuarios.idUsuarios = suscripciones.idUsuario)');
->>>>>>> Stashed changes
 
       for (let index = 0; index < ussers.length; index++) {
         const user = ussers[index];
