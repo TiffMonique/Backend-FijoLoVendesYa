@@ -231,8 +231,20 @@ const listarVentas = async (req, res) => {
 
 const todasVentas = async (req, res) => {
   try {
+    const d = new Date();
+    const now = d.getTime();
     const ventas = await ventasMD.findAll({
-      include: [modeloUsuarios, modeloCategorias],
+      include: [modeloUsuarios, modeloCategorias, {
+        model: anunciosMD,
+        where: {
+          fechaFin:{
+            [Op.gte]: now
+          },
+          fechaInicio: {
+            [Op.lte]: now
+          }
+        },
+        required:true}],
     });var fotos = [];
     var ventasfoto = [];
     // buscando la primera foto de cada venta
@@ -326,6 +338,8 @@ const unaFoto = async (req, res) => {
 };
 
 const busqueda = async(req, res) => {
+  const d = new Date();
+  const now = Date.parse(d.getTime().toString)
   var consulta = "";
   var busquedaCase = "";
   var busquedaCondicion = "";
@@ -368,14 +382,16 @@ const busqueda = async(req, res) => {
   } else if (req.query.precioMax){
     precioQuery= ` and (venta.precio < ${req.query.precioMax})`;
   }
-  consulta = 'select * '+busquedaCase+' from usuarios, venta '+
-  'where (usuarios.idusuarios = venta.idusuario)'+
+  consulta = 'select * '+busquedaCase+' from usuarios, venta, anuncios '+
+  'where (usuarios.idusuarios = venta.idusuario and anuncios.idVenta = venta.idVenta)'+
+  ' and (fechaInicio < CURDATE() and fechaFin > CURDATE()) '+
   busquedaCondicion+
   categoriaQuery+
   departamentoQuery+
   precioQuery+
   ' order by'+((busquedaOrder)?busquedaOrder+",":"")+
   ' fechaPublicacion desc';
+  console.log(consulta)
   try{
     await busquedasMD.create({
       categoria:req.query.categoria,
@@ -418,9 +434,23 @@ const busqueda = async(req, res) => {
 }
 
 const ultimasVentas = async (req, res) => {
+  const d = new Date();
+  const now = d.getTime()
   try {
     const ventas = await ventasMD.findAll({
-      include: [modeloUsuarios, modeloCategorias],
+      include: [modeloUsuarios, modeloCategorias, 
+        {
+          model: anunciosMD,
+          where: {
+            fechaFin:{
+              [Op.gte]: now
+            },
+            fechaInicio: {
+              [Op.lte]: now
+            }
+          },
+          required:true
+        }],
       limit: 9,
       order: [['idVenta', 'DESC']]
     });var fotos = [];
